@@ -73,9 +73,11 @@ endif
 ##---------------------------------------------------------------------
 ## BUILD RULES
 ##---------------------------------------------------------------------
-
+ifeq ($(wildcard $(BUILD_DIR)),)
+	$(MKDIR_P)
+else
+endif
 %.o:%.cpp
-	${MKDIR_P}
 	$(CXX) $(CXXFLAGS) -c -o  $(BUILD_DIR)/$@ $<
 
 %.o:$(IMGUI_DIR)/imgui/%.cpp
