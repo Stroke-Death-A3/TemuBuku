@@ -15,6 +15,7 @@
 #CXX = clang++
 
 EXE = TemuBuku
+MKDIR_P = mkdir build
 IMGUI_DIR = ../
 BIN_DIR = ./bin
 BUILD_DIR = ./build
@@ -74,7 +75,8 @@ endif
 ##---------------------------------------------------------------------
 
 %.o:%.cpp
-	$(CXX) $(CXXFLAGS) -c -o $(BUILD_DIR)/$@ $<
+	${MKDIR_P}
+	$(CXX) $(CXXFLAGS) -c -o  $(BUILD_DIR)/$@ $<
 
 %.o:$(IMGUI_DIR)/imgui/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $(BUILD_DIR)/$@ $<
