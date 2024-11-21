@@ -43,8 +43,8 @@ int main(int, char**)
         ImGui::NewFrame();
 
         ImGui::Begin("TemuBuku");
-        ImGui::Text("Adjust Background Color:");
-        ImGui::ColorEdit3("Background Color", (float*)&clear_color); // Background color editor
+        ImGui::Text("Rubah Latar Warna:");
+        ImGui::ColorEdit3("Latar Warna", (float*)&clear_color); // Background color editor
         ImGui::End();
 
         ImGui::Render();
