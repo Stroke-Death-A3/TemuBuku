@@ -15,6 +15,7 @@ RBTree::RBTree() {
     root = nullptr;
 }
 
+
 int RBTree::getColor(Node *&node) {
     if (node == nullptr)
         return BLACK;
@@ -43,7 +44,23 @@ Node* RBTree::insertBST(Node *&root, Node *&ptr) {
 
     return root;
 }
+Node* RBTree::searchBST(Node *&root, Node*& ptr) {
+    if (root == nullptr) {
+        return nullptr;
+    }
 
+    if (root->data == ptr->data) {
+        return root;
+    } else if (ptr->data < root->data) {
+        return searchBST(root->left, ptr);
+    } else {
+        return searchBST(root->right, ptr);
+    }
+}
+void RBTree::searchValue(int n) {
+    Node *node = new Node(n);
+    cout <<"Cari : "<<n<< "\n" << searchBST(root, node) << endl;
+}
 void RBTree::insertValue(int n) {
     Node *node = new Node(n);
     root = insertBST(root, node);

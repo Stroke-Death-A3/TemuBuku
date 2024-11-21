@@ -29,11 +29,13 @@ class RBTree
         Node *minValueNode(Node *&);
         Node *maxValueNode(Node *&);
         Node* insertBST(Node *&, Node *&);
-        Node* deleteBST(Node *&, int);
+        Node *deleteBST(Node *&, int);
+        Node* searchBST(Node *&,Node *&);
         int getBlackHeight(Node *);
     public:
         RBTree();
         void insertValue(int);
+        void searchValue(int);
         void deleteValue(int);
         void merge(RBTree);
         void inorder();

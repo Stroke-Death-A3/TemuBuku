@@ -12,7 +12,7 @@ int main() {
         rbTree1.insertValue(data);
         cin >> data;
     }
-
+    int key = 5;
     rbTree1.preorder();
-    return 0;
+    rbTree1.searchValue(key);
 }
