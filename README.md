@@ -39,13 +39,14 @@ TemuBuku is a book search application implemented using Red-Black Tree data stru
 2. Install MSYS2 if not already installed
 3. Download GLFW3 library from the official website
 4. Open MSYS2 terminal
-5.Navigate to the source directory :
+5. Navigate to the source directory :
 
    ```bash
    cd src
-6. Build the project.
+   
+7. Build the project.
    
    ```bash
    make
    
-7. Copy the <span style="color:blue">some **GLFW3.dll** text</span> file to the /bin directory where the executable is located
+7. Copy the some **GLFW3.dll** file to the /bin directory where the executable is located
