@@ -1,12 +1,15 @@
 #include <bits/stdc++.h>
 #include "../core/RBTree.cpp"
+#include "File.cpp"
 using namespace std;
 
 int main()
 {
-    int data;
     RBTree rbTree1;
+    int data;
     int n;
+    string  path = "test";
+    openFile(path);
     cin >> n;
     for (int i = 1; i < n; i++)
     {
