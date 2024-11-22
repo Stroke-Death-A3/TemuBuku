@@ -8,7 +8,7 @@ int main()
     RBTree rbTree1;
     int data;
     int n;
-    string  path = "test";
+    string  path = "./datasets/test.txt";
     openFile(path);
     cin >> n;
     for (int i = 1; i < n; i++)
