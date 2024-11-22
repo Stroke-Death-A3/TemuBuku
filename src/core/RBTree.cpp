@@ -50,7 +50,7 @@ Node* RBTree::searchBST(Node *&root, Node*& ptr) {
     }
 
     if (root->data == ptr->data) {
-        return root;
+        return ptr;
     } else if (ptr->data < root->data) {
         return searchBST(root->left, ptr);
     } else {

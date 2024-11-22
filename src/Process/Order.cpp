@@ -14,7 +14,12 @@ int main()
         rbTree1.insertValue(data);
     }
     cin.get();
-    int key = 6;
     rbTree1.preorder();
-    rbTree1.searchValue(6);
+    int e;
+    cin >> e;
+    for (int i = 0; i < e; i++)
+    {
+        int key = rand() % 1000;
+        rbTree1.searchValue(key);
+    }
 }
