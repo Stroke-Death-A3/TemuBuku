@@ -25,7 +25,7 @@ TemuBuku is a book search application implemented using Red-Black Tree data stru
 
 ### Linux
 1. Clone the repository
-2. Navigate to the source directory:
+2. Navigate to the source directory :
    
    ```bash
    cd src
