@@ -5,7 +5,7 @@
 #include "RBTree.h"
 using namespace std;
 
-Node::Node(int data) {
+Node::Node(string data) {
     this->data = data;
     color = RED;
     left = right = parent = nullptr;
@@ -57,11 +57,11 @@ Node* RBTree::searchBST(Node *&root, Node*& ptr) {
         return searchBST(root->right, ptr);
     }
 }
-void RBTree::searchValue(int n) {
+void RBTree::searchValue(string n) {
     Node *node = new Node(n);
     cout <<"Cari : "<<n<< "\n" << searchBST(root, node) << endl;
 }
-void RBTree::insertValue(int n) {
+void RBTree::insertValue(string n) {
     Node *node = new Node(n);
     root = insertBST(root, node);
     fixInsertRBTree(node);
@@ -251,7 +251,7 @@ void RBTree::fixDeleteRBTree(Node *&node) {
     }
 }
 
-Node* RBTree::deleteBST(Node *&root, int data) {
+Node* RBTree::deleteBST(Node *&root, string data) {
     if (root == nullptr)
         return root;
 
@@ -269,7 +269,7 @@ Node* RBTree::deleteBST(Node *&root, int data) {
     return deleteBST(root->right, temp->data);
 }
 
-void RBTree::deleteValue(int data) {
+void RBTree::deleteValue(string data) {
     Node *node = deleteBST(root, data);
     fixDeleteRBTree(node);
 }
@@ -335,7 +335,7 @@ int RBTree::getBlackHeight(Node *node) {
 // Test case 3 : 2 1 3 0 8 9 4 5 0
 
 void RBTree::merge(RBTree rbTree2) {
-    int temp;
+    string temp;
     Node *c, *temp_ptr;
     Node *root1 = root;
     Node *root2 = rbTree2.root;

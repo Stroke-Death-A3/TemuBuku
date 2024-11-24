@@ -13,7 +13,8 @@ int main()
     cin >> n;
     for (int i = 1; i < n+1; i++)
     {
-        data = i;
+        std::string data;
+        cin >> data;
         rbTree1.insertValue(data);
     }
     cin.get();
@@ -22,7 +23,7 @@ int main()
     cin >> e;
     for (int i = 0; i < e; i++)
     {
-        int key = rand() % n;
+        std::string key = "data";
         rbTree1.searchValue(key);
     }
 }
