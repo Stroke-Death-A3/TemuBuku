@@ -44,22 +44,68 @@ Node* RBTree::insertBST(Node *&root, Node *&ptr) {
 
     return root;
 }
-Node* RBTree::searchBST(Node *&root, Node*& ptr) {
-    if (root == nullptr) {
-        return nullptr;
-    }
 
-    if (root->data == ptr->data) {
-        return ptr;
-    } else if (ptr->data < root->data) {
-        return searchBST(root->left, ptr);
-    } else {
-        return searchBST(root->right, ptr);
+bool RBTree::areSimilar(const std::string& str1, const std::string& str2) {
+    // Remove any trailing numbers from str1
+    std::string base1 = str1;
+    while (!base1.empty() && std::isdigit(base1.back())) {
+        base1.pop_back();
     }
+    
+    // Remove any trailing numbers from str2
+    std::string base2 = str2;
+    while (!base2.empty() && std::isdigit(base2.back())) {
+        base2.pop_back();
+    }
+    
+    return base1 == base2;
 }
-void RBTree::searchValue(string n) {
-    Node *node = new Node(n);
-    cout <<"Cari : "<<n<< "\n" << searchBST(root, node) << endl;
+
+std::vector<Node*> RBTree::searchBST(Node* root, Node* ptr) {
+    std::vector<Node*> result;
+    if (root == nullptr) {
+        return result;
+    }
+    
+    // Convert search term to lowercase for comparison
+    std::string searchTerm = ptr->data;
+    std::transform(searchTerm.begin(), searchTerm.end(), searchTerm.begin(), ::tolower);
+    
+    // Convert current node's data to lowercase for comparison
+    std::string nodeData = root->data;
+    std::transform(nodeData.begin(), nodeData.end(), nodeData.begin(), ::tolower);
+    
+    // Check if the current node's data contains the search term
+    // or if search term contains the current node's data
+    if (nodeData.find(searchTerm) != std::string::npos || 
+        searchTerm.find(nodeData) != std::string::npos) {
+        result.push_back(root);
+    }
+    
+    // Search both subtrees
+    std::vector<Node*> left_result = searchBST(root->left, ptr);
+    std::vector<Node*> right_result = searchBST(root->right, ptr);
+    
+    // Combine results
+    result.insert(result.end(), left_result.begin(), left_result.end());
+    result.insert(result.end(), right_result.begin(), right_result.end());
+    
+    return result;
+}
+void RBTree::searchValue(std::string n) {
+    Node* node = new Node(n);
+    std::vector<Node*> result = searchBST(root, node);
+    delete node;
+    
+    if (result.empty()) {
+        std::cout << "Tidak ada node yang mempunyai kemiripan" << n ;
+    } else {
+        std::cout << "Menemukan Node yang sama " << n << ":\n";
+        for (Node* foundNode : result) {
+            std::cout << foundNode->data << std::endl;
+        }
+        std::cout << "\nTotal matches found: " << result.size() << std::endl;
+    }
 }
 void RBTree::insertValue(string n) {
     Node *node = new Node(n);
@@ -251,22 +297,29 @@ void RBTree::fixDeleteRBTree(Node *&node) {
     }
 }
 
-Node* RBTree::deleteBST(Node *&root, string data) {
-    if (root == nullptr)
+Node* RBTree::deleteBST(Node*& root, std::string data) {
+    if (root == nullptr) {
         return root;
+    }
 
-    if (data < root->data)
+    if (data < root->data) {
         return deleteBST(root->left, data);
-
-    if (data > root->data)
+    }
+    
+    if (data > root->data) {
         return deleteBST(root->right, data);
-
-    if (root->left == nullptr || root->right == nullptr)
-        return root;
-
+    }
+    
+    if (root->left == nullptr || root->right == nullptr) {
+        Node *temp = root->left ? root->left : root->right;
+        delete root;
+        return temp;
+    }
+    
     Node *temp = minValueNode(root->right);
     root->data = temp->data;
-    return deleteBST(root->right, temp->data);
+    root->right = deleteBST(root->right, temp->data);
+    return root;
 }
 
 void RBTree::deleteValue(string data) {
