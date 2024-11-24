@@ -11,7 +11,7 @@ int main()
     string  path = "./datasets/test.txt";
     openFile(path);
     cin >> n;
-    for (int i = 1; i < n; i++)
+    for (int i = 1; i < n+1; i++)
     {
         data = i;
         rbTree1.insertValue(data);
