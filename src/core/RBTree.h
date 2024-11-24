@@ -4,6 +4,13 @@
 
 enum Color {BLACK, RED, DOUBLE_BLACK};
 
+struct Book {
+    int id;
+    std::string title;
+
+    Book() : id(0) {}
+};
+
 struct Node
 {
     int data;
