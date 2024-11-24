@@ -22,7 +22,7 @@ int main()
     cin >> e;
     for (int i = 0; i < e; i++)
     {
-        int key = rand() % 1000;
+        int key = rand() % n;
         rbTree1.searchValue(key);
     }
 }
