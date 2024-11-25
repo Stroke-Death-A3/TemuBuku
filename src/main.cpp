@@ -3,7 +3,7 @@
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>
 #define GL_SILENCE_DEPRECATION
-#include <GLFW/glfw3.h> // OpenGL headers
+#include <GLFW/glfw3.h> 
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -29,11 +29,16 @@ int main(int, char**)
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
+
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f); // Default background color
+    ImVec4 clear_color = ImVec4(0.1f, 0.1f, 0.1f, 1.00f); 
+
+
+    ImFont* custom_font = io.Fonts->AddFontFromFileTTF("C:/engine_project/src/Process/datasets/font/Play Chickens.otf", 40.0f); 
+    ImFont* roboto_font = io.Fonts->AddFontFromFileTTF("C:/engine_project/src/Process/datasets/font/Roboto-Regular.ttf", 20.0f); 
 
     while (!glfwWindowShouldClose(window))
     {
@@ -42,16 +47,33 @@ int main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("TemuBuku");
-        ImGui::Text("Rubah Latar Warna:");
-        ImGui::ColorEdit3("Latar Warna", (float*)&clear_color); // Background color editor
+        ImVec2 screen_center = ImVec2(640, 200); 
+        ImGui::PushFont(custom_font);
+        ImVec2 text_size = ImGui::CalcTextSize("Selamat datang di TemuBuku!");
+        ImVec2 text_pos = ImVec2(screen_center.x - text_size.x / 2, screen_center.y - text_size.y / 2);
+        ImGui::GetForegroundDrawList()->AddText(text_pos, IM_COL32(255, 255, 255, 255), "Selamat datang di TemuBuku!");
+        ImGui::PopFont();
+
+        ImVec2 input_size = ImVec2(700, 60);
+        ImVec2 input_pos = ImVec2(screen_center.x - input_size.x / 2, screen_center.y + text_size.y / 2 + 20);
+
+        ImGui::SetNextWindowPos(input_pos); 
+        ImGui::SetNextWindowSize(input_size, ImGuiCond_Always);
+        ImGui::Begin("Input Field", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+
         ImGui::End();
+
+        ImGui::PushFont(roboto_font);
+        ImVec2 bottom_text_size = ImGui::CalcTextSize("Cari buku, temukan cerita. TemuBuku hadir untuk menjelajah, memilih dan membaca tanpa batas!");
+        ImVec2 bottom_text_pos = ImVec2(screen_center.x - bottom_text_size.x / 2, 650); 
+        ImGui::GetForegroundDrawList()->AddText(bottom_text_pos, IM_COL32(255, 255, 255, 255), "Cari buku, temukan cerita. TemuBuku hadir untuk menjelajah, memilih dan membaca tanpa batas!");
+        ImGui::PopFont();
 
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
