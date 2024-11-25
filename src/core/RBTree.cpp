@@ -93,12 +93,30 @@ std::vector<Node*> RBTree::searchBST(Node* root, Node* ptr) {
     return result;
 }
 void RBTree::searchValue(std::string n) {
+    // Check if the input string is "random"
+    if (n == "random") {
+        // Generate a random number
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> distrib(1000, 9999); // Adjust range as needed
+        int randomNum = distrib(gen);
+
+        // Convert the random number to a string
+        n = std::to_string(randomNum);
+    }
+
+    // Create a temporary Node for the search
     Node* node = new Node(n);
+
+    // Search the RBT for nodes containing the specified string
     std::vector<Node*> result = searchBST(root, node);
+
+    // Delete the temporary Node
     delete node;
-    
+
+    // Print the search results
     if (result.empty()) {
-        std::cout << "Tidak ada node yang mempunyai kemiripan " << n ;
+        std::cout << "Tidak ada node yang mempunyai kemiripan " << n << std::endl;
     } else {
         std::cout << "Menemukan Node yang mirip " << "'" << n << "'"<< "\n";
         for (Node* foundNode : result) {
@@ -107,6 +125,7 @@ void RBTree::searchValue(std::string n) {
         std::cout << "\nTotal matches found: " << result.size() << std::endl;
     }
 }
+
 void RBTree::insertValue(string n) {
     Node *node = new Node(n);
     root = insertBST(root, node);
