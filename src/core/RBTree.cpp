@@ -98,7 +98,7 @@ void RBTree::searchValue(std::string n) {
     delete node;
     
     if (result.empty()) {
-        std::cout << "Tidak ada node yang mempunyai kemiripan" << n ;
+        std::cout << "Tidak ada node yang mempunyai kemiripan " << n ;
     } else {
         std::cout << "Menemukan Node yang mirip " << "'" << n << "'"<< "\n";
         for (Node* foundNode : result) {
