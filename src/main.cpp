@@ -41,8 +41,8 @@ int main(int, char**)
     ImVec4 clear_color = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
 
     // Load fonts
-    ImFont* play_chickens_font = io.Fonts->AddFontFromFileTTF("./font/Play-Chickens.otf", 30.0f);
-    ImFont* roboto_font = io.Fonts->AddFontFromFileTTF("./font/Roboto-Regular.ttf", 20.0f);
+    ImFont* play_chickens_font = io.Fonts->AddFontFromFileTTF("../font/Play-Chickens.otf", 30.0f);
+    ImFont* roboto_font = io.Fonts->AddFontFromFileTTF("../font/Roboto-Regular.ttf", 20.0f);
     if (!play_chickens_font || !roboto_font) {
         fprintf(stderr, "Error: Failed to load fonts!\n");
         return 1;
