@@ -1,6 +1,3 @@
-//
-// Red Black Tree Implementation
-//
 #include <bits/stdc++.h>
 #include "RBTree.h"
 using namespace std;
