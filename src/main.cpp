@@ -41,9 +41,9 @@ int main(int, char**)
     ImVec4 clear_color = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
 
     // Load fonts
-    ImFont* judul_utama = io.Fonts->AddFontFromFileTTF("AntipastoPro-Bold_trial.ttf", 50.0f);
-    ImFont* font_quotes = io.Fonts->AddFontFromFileTTF("AntipastoPro-Bold_trial.ttf", 20.0f);
-    ImFont* font_elemen = io.Fonts->AddFontFromFileTTF("AntipastoPro-Bold_trial.ttf", 25.0f);
+    ImFont* judul_utama = io.Fonts->AddFontFromFileTTF("../font/AntipastoPro-Bold_trial.ttf", 50.0f);
+    ImFont* font_quotes = io.Fonts->AddFontFromFileTTF("../font/AntipastoPro-Bold_trial.ttf", 20.0f);
+    ImFont* font_elemen = io.Fonts->AddFontFromFileTTF("../font/AntipastoPro-Bold_trial.ttf", 25.0f);
 
     static char buffer[256] = ""; 
     // Warna abu-abu dongker
