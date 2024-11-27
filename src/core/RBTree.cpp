@@ -42,7 +42,7 @@ Node* RBTree::insertBST(Node *&root, Node *&ptr) {
     return root;
 }
 
-bool RBTree::areSimilar(const std::string& str1, const std::string& str2) {
+bool RBTree::areSimiliar(const std::string& str1, const std::string& str2) {
     // Remove any trailing numbers from str1
     std::string base1 = str1;
     while (!base1.empty() && std::isdigit(base1.back())) {
@@ -89,7 +89,7 @@ std::vector<Node*> RBTree::searchBST(Node* root, Node* ptr) {
     
     return result;
 }
-void RBTree::searchValue(std::string n) {
+void RBTree::searchValue(std::string& n) {
     // Check if the input string is "random"
     if (n == "random") {
         // Generate a random number
@@ -114,6 +114,7 @@ void RBTree::searchValue(std::string n) {
     // Print the search results
     if (result.empty()) {
         std::cout << "Tidak ada node yang mempunyai kemiripan " << n << std::endl;
+        return;
     } else {
         std::cout << "Menemukan Node yang mirip " << "'" << n << "'"<< "\n";
         for (Node* foundNode : result) {
@@ -402,6 +403,83 @@ int RBTree::getBlackHeight(Node *node) {
 // Test case 1 : 5 2 9 1 6 8 0 20 30 35 40 50 0
 // Test case 2 : 3 0 5 0
 // Test case 3 : 2 1 3 0 8 9 4 5 0
+
+// Method to add a book to favorites
+void RBTree::addToFavorites(const std::string& bookIdentifier) {
+    // Search for the book in the tree
+
+    Node* node = new Node(bookIdentifier);
+    Node* selectedBook = nullptr;
+
+    std::vector<Node*> searchResults = searchBST(root, node);
+    delete node;
+    // If multiple matches, let user choose
+    if (searchResults.size() > 1) {
+        std::cout << "Multiple books found. Please select:" << std::endl;
+        for (Node* foundNode : searchResults) {
+            for(int i = 0; i < searchResults.size(); i++){
+                    std::cout << i <<". " << searchResults[i]->data << std::endl;
+            }
+            
+        }
+        
+        int choice;
+        std::cout << "Enter the number of the book to add to favorites: ";
+        std::cin >> choice;
+        
+        if (choice > 0 && choice <= searchResults.size()) {
+            selectedBook = searchResults[choice - 1];
+        } else {
+            std::cout << "Invalid choice." << std::endl;
+            return;
+        }
+    } else if (searchResults.size() == 1) {
+        selectedBook = searchResults[0];
+    } else {
+        std::cout << "No book found with the given identifier." << std::endl;
+        return;
+    }
+    
+    // Add the selected book to favorites
+    if (selectedBook) {
+        auto it = std::find(favoriteList.begin(), favoriteList.end(), selectedBook);
+        if (it == favoriteList.end()) {
+            selectedBook->isFavorite = true;
+            favoriteList.push_back(selectedBook);
+            std::cout << "Added to favorites: " << selectedBook->title << std::endl;
+        } else {
+            std::cout << "Book is already in favorites." << std::endl;
+        }
+    }
+}
+
+// Method to remove a book from favorites
+void RBTree::removeFromFavorites(const std::string& bookIdentifier) {
+    auto it = std::find_if(favoriteList.begin(), favoriteList.end(),
+                           [&bookIdentifier](Node* book) {
+                               return book->title.find(bookIdentifier) != std::string::npos ||
+                                      book->author.find(bookIdentifier) != std::string::npos;
+                           });
+    if (it != favoriteList.end()) {
+        (*it)->isFavorite = false;
+        favoriteList.erase(it);
+        std::cout << "Removed from favorites: " << (*it)->title << std::endl;
+    } else {
+        std::cout << "Book not found in favorites." << std::endl;
+    }
+}
+
+// Method to display favorite books
+void RBTree::displayFavorites() {
+    if (favoriteList.empty()) {
+        std::cout << "No favorite books." << std::endl;
+    } else {
+        std::cout << "Favorite Books:" << std::endl;
+        for (const auto& book : favoriteList) {
+            std::cout << book->title << " by " << book->data << std::endl;
+        }
+    }
+}
 
 void RBTree::merge(RBTree rbTree2) {
     string temp;

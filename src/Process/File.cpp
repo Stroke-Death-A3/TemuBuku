@@ -69,7 +69,8 @@ void File::parseFile() {
                     fields[5],                       // format
                     stringToType<double>(fields[7]), // rating
                     stringToType<double>(fields[8]), // reviews
-                    fields[9]                        // url
+                    fields[9],                       // url
+                    rbTree                           // rbTree reference
                 );
                 
                 // Convert book to a string representation for insertion

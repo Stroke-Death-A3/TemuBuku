@@ -1,12 +1,16 @@
-#ifndef RED_BLACK_TREE_RBTREE_H
-#define RED_BLACK_TREE_RBTREE_H
+#ifndef RBTREE_H
+#define RBTREE_H
 
 #include <string>
 #include <vector>
 
 enum Color { BLACK, RED, DOUBLE_BLACK };
 
-struct Node {
+class Node {
+public:
+    std::string title;
+    std::string author;
+    bool isFavorite;
     std::string data;
     int color;
     Node *left, *right, *parent;
@@ -14,11 +18,26 @@ struct Node {
 };
 
 class RBTree {
+public:
+    RBTree();
+    std::vector<Node*> searchBST(Node* root, Node* key);
+    void addToFavorites(const std::string& bookIdentifier);
+    void removeFromFavorites(const std::string& bookIdentifier);
+    void searchValue(std::string& n);
+    void displayFavorites();
+    void insertValue(std::string);
+    void deleteValue(std::string);
+    void merge(RBTree);
+    void inorder();
+    void preorder();
+    std::vector<Node*> favoriteList;
+
 private:
     Node* root;
 
 protected:
     void rotateLeft(Node*&);
+    bool areSimiliar(const std::string&, const std::string&);
     void rotateRight(Node*&);
     void fixInsertRBTree(Node*&);
     void fixDeleteRBTree(Node*&);
@@ -29,19 +48,8 @@ protected:
     Node* minValueNode(Node*&);
     Node* maxValueNode(Node*&);
     Node* insertBST(Node*&, Node*&);
-    std::vector<Node*> searchBST(Node* root, Node* ptr);
     Node* deleteBST(Node*&, std::string);
     int getBlackHeight(Node*);
-
-public:
-    RBTree();
-    bool areSimilar(const std::string& str1, const std::string& str2);
-    void insertValue(std::string);
-    void searchValue(std::string);
-    void deleteValue(std::string);
-    void merge(RBTree);
-    void inorder();
-    void preorder();
 };
 
-#endif // RED_BLACK_TREE_RBTREE_H
+#endif // RBTREE_H
