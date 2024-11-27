@@ -416,12 +416,9 @@ void RBTree::addToFavorites(const std::string& bookIdentifier) {
     // If multiple matches, let user choose
     if (searchResults.size() > 1) {
         std::cout << "Multiple books found. Please select:" << std::endl;
-        for (Node* foundNode : searchResults) {
-            for(int i = 0; i < searchResults.size(); i++){
+            for(int i = 1; i < searchResults.size(); i++){
                     std::cout << i <<". " << searchResults[i]->data << std::endl;
             }
-            
-        }
         
         int choice;
         std::cout << "Enter the number of the book to add to favorites: ";
