@@ -454,13 +454,11 @@ void RBTree::addToFavorites(const std::string& bookIdentifier) {
 void RBTree::removeFromFavorites(const std::string& bookIdentifier) {
     auto it = std::find_if(favoriteList.begin(), favoriteList.end(),
                            [&bookIdentifier](Node* book) {
-                               return book->title.find(bookIdentifier) != std::string::npos ||
-                                      book->author.find(bookIdentifier) != std::string::npos;
-                           });
+                               return book->data.find(bookIdentifier) != std::string::npos ;                           });
     if (it != favoriteList.end()) {
         (*it)->isFavorite = false;
         favoriteList.erase(it);
-        std::cout << "Removed from favorites: " << (*it)->title << std::endl;
+        std::cout << "Removed from favorites: " << (*it)->data << std::endl;
     } else {
         std::cout << "Book not found in favorites." << std::endl;
     }

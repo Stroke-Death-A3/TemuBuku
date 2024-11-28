@@ -25,6 +25,8 @@ int main() {
         rbTree1.searchValue(InputJudul);
         rbTree1.addToFavorites(InputJudul);
         rbTree1.displayFavorites();
+        rbTree1.removeFromFavorites(InputJudul);
+        rbTree1.displayFavorites();
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }
