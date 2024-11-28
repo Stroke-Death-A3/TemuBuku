@@ -2,39 +2,46 @@
 #include "RBTree.h"
 using namespace std;
 
-Node::Node(string data) {
+Node::Node(string data)
+{
     this->data = data;
     color = RED;
     left = right = parent = nullptr;
 }
 
-RBTree::RBTree() {
+RBTree::RBTree()
+{
     root = nullptr;
 }
 
-
-int RBTree::getColor(Node *&node) {
+int RBTree::getColor(Node *&node)
+{
     if (node == nullptr)
         return BLACK;
 
     return node->color;
 }
 
-void RBTree::setColor(Node *&node, int color) {
+void RBTree::setColor(Node *&node, int color)
+{
     if (node == nullptr)
         return;
 
     node->color = color;
 }
 
-Node* RBTree::insertBST(Node *&root, Node *&ptr) {
+Node *RBTree::insertBST(Node *&root, Node *&ptr)
+{
     if (root == nullptr)
         return ptr;
 
-    if (ptr->data < root->data) {
+    if (ptr->data < root->data)
+    {
         root->left = insertBST(root->left, ptr);
         root->left->parent = root;
-    } else if (ptr->data > root->data) {
+    }
+    else if (ptr->data > root->data)
+    {
         root->right = insertBST(root->right, ptr);
         root->right->parent = root;
     }
@@ -42,56 +49,64 @@ Node* RBTree::insertBST(Node *&root, Node *&ptr) {
     return root;
 }
 
-bool RBTree::areSimiliar(const std::string& str1, const std::string& str2) {
+bool RBTree::areSimiliar(const std::string &str1, const std::string &str2)
+{
     // Remove any trailing numbers from str1
     std::string base1 = str1;
-    while (!base1.empty() && std::isdigit(base1.back())) {
+    while (!base1.empty() && std::isdigit(base1.back()))
+    {
         base1.pop_back();
     }
-    
+
     // Remove any trailing numbers from str2
     std::string base2 = str2;
-    while (!base2.empty() && std::isdigit(base2.back())) {
+    while (!base2.empty() && std::isdigit(base2.back()))
+    {
         base2.pop_back();
     }
-    
+
     return base1 == base2;
 }
 
-std::vector<Node*> RBTree::searchBST(Node* root, Node* ptr) {
-    std::vector<Node*> result;
-    if (root == nullptr) {
+std::vector<Node *> RBTree::searchBST(Node *root, Node *ptr)
+{
+    std::vector<Node *> result;
+    if (root == nullptr)
+    {
         return result;
     }
-    
+
     // Convert search term to lowercase for comparison
     std::string searchTerm = ptr->data;
     std::transform(searchTerm.begin(), searchTerm.end(), searchTerm.begin(), ::tolower);
-    
+
     // Convert current node's data to lowercase for comparison
     std::string nodeData = root->data;
     std::transform(nodeData.begin(), nodeData.end(), nodeData.begin(), ::tolower);
-    
+
     // Check if the current node's data contains the search term
     // or if search term contains the current node's data
-    if (nodeData.find(searchTerm) != std::string::npos || 
-        searchTerm.find(nodeData) != std::string::npos) {
+    if (nodeData.find(searchTerm) != std::string::npos ||
+        searchTerm.find(nodeData) != std::string::npos)
+    {
         result.push_back(root);
     }
-    
+
     // Search both subtrees
-    std::vector<Node*> left_result = searchBST(root->left, ptr);
-    std::vector<Node*> right_result = searchBST(root->right, ptr);
-    
+    std::vector<Node *> left_result = searchBST(root->left, ptr);
+    std::vector<Node *> right_result = searchBST(root->right, ptr);
+
     // Combine results
     result.insert(result.end(), left_result.begin(), left_result.end());
     result.insert(result.end(), right_result.begin(), right_result.end());
-    
+
     return result;
 }
-void RBTree::searchValue(std::string& n) {
+void RBTree::searchValue(std::string &n)
+{
     // Check if the input string is "random"
-    if (n == "random") {
+    if (n == "random")
+    {
         // Generate a random number
         std::random_device rd;
         std::mt19937 gen(rd());
@@ -103,34 +118,40 @@ void RBTree::searchValue(std::string& n) {
     }
 
     // Create a temporary Node for the search
-    Node* node = new Node(n);
+    Node *node = new Node(n);
 
     // Search the RBT for nodes containing the specified string
-    std::vector<Node*> result = searchBST(root, node);
+    std::vector<Node *> result = searchBST(root, node);
 
     // Delete the temporary Node
     delete node;
 
     // Print the search results
-    if (result.empty()) {
+    if (result.empty())
+    {
         std::cout << "Tidak ada node yang mempunyai kemiripan " << n << std::endl;
         return;
-    } else {
-        std::cout << "Menemukan Node yang mirip " << "'" << n << "'"<< "\n";
-        for (Node* foundNode : result) {
+    }
+    else
+    {
+        std::cout << "Menemukan Node yang mirip " << "'" << n << "'" << "\n";
+        for (Node *foundNode : result)
+        {
             std::cout << foundNode->data << std::endl;
         }
         std::cout << "\nTotal matches found: " << result.size() << std::endl;
     }
 }
 
-void RBTree::insertValue(string n) {
+void RBTree::insertValue(string n)
+{
     Node *node = new Node(n);
     root = insertBST(root, node);
     fixInsertRBTree(node);
 }
 
-void RBTree::rotateLeft(Node *&ptr) {
+void RBTree::rotateLeft(Node *&ptr)
+{
     Node *right_child = ptr->right;
     ptr->right = right_child->left;
 
@@ -150,7 +171,8 @@ void RBTree::rotateLeft(Node *&ptr) {
     ptr->parent = right_child;
 }
 
-void RBTree::rotateRight(Node *&ptr) {
+void RBTree::rotateRight(Node *&ptr)
+{
     Node *left_child = ptr->left;
     ptr->left = left_child->right;
 
@@ -170,21 +192,28 @@ void RBTree::rotateRight(Node *&ptr) {
     ptr->parent = left_child;
 }
 
-void RBTree::fixInsertRBTree(Node *&ptr) {
+void RBTree::fixInsertRBTree(Node *&ptr)
+{
     Node *parent = nullptr;
     Node *grandparent = nullptr;
-    while (ptr != root && getColor(ptr) == RED && getColor(ptr->parent) == RED) {
+    while (ptr != root && getColor(ptr) == RED && getColor(ptr->parent) == RED)
+    {
         parent = ptr->parent;
         grandparent = parent->parent;
-        if (parent == grandparent->left) {
+        if (parent == grandparent->left)
+        {
             Node *uncle = grandparent->right;
-            if (getColor(uncle) == RED) {
+            if (getColor(uncle) == RED)
+            {
                 setColor(uncle, BLACK);
                 setColor(parent, BLACK);
                 setColor(grandparent, RED);
                 ptr = grandparent;
-            } else {
-                if (ptr == parent->right) {
+            }
+            else
+            {
+                if (ptr == parent->right)
+                {
                     rotateLeft(parent);
                     ptr = parent;
                     parent = ptr->parent;
@@ -193,15 +222,21 @@ void RBTree::fixInsertRBTree(Node *&ptr) {
                 swap(parent->color, grandparent->color);
                 ptr = parent;
             }
-        } else {
+        }
+        else
+        {
             Node *uncle = grandparent->left;
-            if (getColor(uncle) == RED) {
+            if (getColor(uncle) == RED)
+            {
                 setColor(uncle, BLACK);
                 setColor(parent, BLACK);
                 setColor(grandparent, RED);
                 ptr = grandparent;
-            } else {
-                if (ptr == parent->left) {
+            }
+            else
+            {
+                if (ptr == parent->left)
+                {
                     rotateRight(parent);
                     ptr = parent;
                     parent = ptr->parent;
@@ -215,54 +250,71 @@ void RBTree::fixInsertRBTree(Node *&ptr) {
     setColor(root, BLACK);
 }
 
-void RBTree::fixDeleteRBTree(Node *&node) {
+void RBTree::fixDeleteRBTree(Node *&node)
+{
     if (node == nullptr)
         return;
 
-    if (node == root) {
+    if (node == root)
+    {
         root = nullptr;
         return;
     }
 
-    if (getColor(node) == RED || getColor(node->left) == RED || getColor(node->right) == RED) {
+    if (getColor(node) == RED || getColor(node->left) == RED || getColor(node->right) == RED)
+    {
         Node *child = node->left != nullptr ? node->left : node->right;
 
-        if (node == node->parent->left) {
+        if (node == node->parent->left)
+        {
             node->parent->left = child;
             if (child != nullptr)
                 child->parent = node->parent;
             setColor(child, BLACK);
             delete (node);
-        } else {
+        }
+        else
+        {
             node->parent->right = child;
             if (child != nullptr)
                 child->parent = node->parent;
             setColor(child, BLACK);
             delete (node);
         }
-    } else {
+    }
+    else
+    {
         Node *sibling = nullptr;
         Node *parent = nullptr;
         Node *ptr = node;
         setColor(ptr, DOUBLE_BLACK);
-        while (ptr != root && getColor(ptr) == DOUBLE_BLACK) {
+        while (ptr != root && getColor(ptr) == DOUBLE_BLACK)
+        {
             parent = ptr->parent;
-            if (ptr == parent->left) {
+            if (ptr == parent->left)
+            {
                 sibling = parent->right;
-                if (getColor(sibling) == RED) {
+                if (getColor(sibling) == RED)
+                {
                     setColor(sibling, BLACK);
                     setColor(parent, RED);
                     rotateLeft(parent);
-                } else {
-                    if (getColor(sibling->left) == BLACK && getColor(sibling->right) == BLACK) {
+                }
+                else
+                {
+                    if (getColor(sibling->left) == BLACK && getColor(sibling->right) == BLACK)
+                    {
                         setColor(sibling, RED);
-                        if(getColor(parent) == RED)
+                        if (getColor(parent) == RED)
                             setColor(parent, BLACK);
                         else
                             setColor(parent, DOUBLE_BLACK);
                         ptr = parent;
-                    } else {
-                        if (getColor(sibling->right) == BLACK) {
+                    }
+                    else
+                    {
+                        if (getColor(sibling->right) == BLACK)
+                        {
                             setColor(sibling->left, BLACK);
                             setColor(sibling, RED);
                             rotateRight(sibling);
@@ -275,22 +327,31 @@ void RBTree::fixDeleteRBTree(Node *&node) {
                         break;
                     }
                 }
-            } else {
+            }
+            else
+            {
                 sibling = parent->left;
-                if (getColor(sibling) == RED) {
+                if (getColor(sibling) == RED)
+                {
                     setColor(sibling, BLACK);
                     setColor(parent, RED);
                     rotateRight(parent);
-                } else {
-                    if (getColor(sibling->left) == BLACK && getColor(sibling->right) == BLACK) {
+                }
+                else
+                {
+                    if (getColor(sibling->left) == BLACK && getColor(sibling->right) == BLACK)
+                    {
                         setColor(sibling, RED);
                         if (getColor(parent) == RED)
                             setColor(parent, BLACK);
                         else
                             setColor(parent, DOUBLE_BLACK);
                         ptr = parent;
-                    } else {
-                        if (getColor(sibling->left) == BLACK) {
+                    }
+                    else
+                    {
+                        if (getColor(sibling->left) == BLACK)
+                        {
                             setColor(sibling->right, BLACK);
                             setColor(sibling, RED);
                             rotateLeft(sibling);
@@ -309,42 +370,49 @@ void RBTree::fixDeleteRBTree(Node *&node) {
             node->parent->left = nullptr;
         else
             node->parent->right = nullptr;
-        delete(node);
+        delete (node);
         setColor(root, BLACK);
     }
 }
 
-Node* RBTree::deleteBST(Node*& root, std::string data) {
-    if (root == nullptr) {
+Node *RBTree::deleteBST(Node *&root, std::string data)
+{
+    if (root == nullptr)
+    {
         return root;
     }
 
-    if (data < root->data) {
+    if (data < root->data)
+    {
         return deleteBST(root->left, data);
     }
-    
-    if (data > root->data) {
+
+    if (data > root->data)
+    {
         return deleteBST(root->right, data);
     }
-    
-    if (root->left == nullptr || root->right == nullptr) {
+
+    if (root->left == nullptr || root->right == nullptr)
+    {
         Node *temp = root->left ? root->left : root->right;
         delete root;
         return temp;
     }
-    
+
     Node *temp = minValueNode(root->right);
     root->data = temp->data;
     root->right = deleteBST(root->right, temp->data);
     return root;
 }
 
-void RBTree::deleteValue(string data) {
+void RBTree::deleteValue(string data)
+{
     Node *node = deleteBST(root, data);
     fixDeleteRBTree(node);
 }
 
-void RBTree::inorderBST(Node *&ptr) {
+void RBTree::inorderBST(Node *&ptr)
+{
     if (ptr == nullptr)
         return;
 
@@ -353,11 +421,13 @@ void RBTree::inorderBST(Node *&ptr) {
     inorderBST(ptr->right);
 }
 
-void RBTree::inorder() {
+void RBTree::inorder()
+{
     inorderBST(root);
 }
 
-void RBTree::preorderBST(Node *&ptr) {
+void RBTree::preorderBST(Node *&ptr)
+{
     if (ptr == nullptr)
         return;
 
@@ -366,12 +436,14 @@ void RBTree::preorderBST(Node *&ptr) {
     preorderBST(ptr->right);
 }
 
-void RBTree::preorder() {
+void RBTree::preorder()
+{
     preorderBST(root);
     cout << "-------" << endl;
 }
 
-Node *RBTree::minValueNode(Node *&node) {
+Node *RBTree::minValueNode(Node *&node)
+{
 
     Node *ptr = node;
 
@@ -381,7 +453,8 @@ Node *RBTree::minValueNode(Node *&node) {
     return ptr;
 }
 
-Node* RBTree::maxValueNode(Node *&node) {
+Node *RBTree::maxValueNode(Node *&node)
+{
     Node *ptr = node;
 
     while (ptr->right != nullptr)
@@ -390,9 +463,11 @@ Node* RBTree::maxValueNode(Node *&node) {
     return ptr;
 }
 
-int RBTree::getBlackHeight(Node *node) {
+int RBTree::getBlackHeight(Node *node)
+{
     int blackheight = 0;
-    while (node != nullptr) {
+    while (node != nullptr)
+    {
         if (getColor(node) == BLACK)
             blackheight++;
         node = node->left;
@@ -405,102 +480,130 @@ int RBTree::getBlackHeight(Node *node) {
 // Test case 3 : 2 1 3 0 8 9 4 5 0
 
 // Method to add a book to favorites
-void RBTree::addToFavorites(const std::string& bookIdentifier) {
+void RBTree::addToFavorites(const std::string &bookIdentifier)
+{
     // Search for the book in the tree
 
-    Node* node = new Node(bookIdentifier);
-    Node* selectedBook = nullptr;
+    Node *node = new Node(bookIdentifier);
+    Node *selectedBook = nullptr;
 
-    std::vector<Node*> searchResults = searchBST(root, node);
+    std::vector<Node *> searchResults = searchBST(root, node);
     delete node;
     // If multiple matches, let user choose
-    if (searchResults.size() > 1) {
+    if (searchResults.size() > 1)
+    {
         std::cout << "Multiple books found. Please select:" << std::endl;
-            for(int i = 1; i < searchResults.size(); i++){
-                    std::cout << i <<". " << searchResults[i]->data << std::endl;
-            }
-        
+        for (int i = 1; i < searchResults.size(); i++)
+        {
+            std::cout << i << ". " << searchResults[i]->data << std::endl;
+        }
+
         int choice;
         std::cout << "Enter the number of the book to add to favorites: ";
         std::cin >> choice;
-        
-        if (choice > 0 && choice <= searchResults.size()) {
+
+        if (choice > 0 && choice <= searchResults.size())
+        {
             selectedBook = searchResults[choice - 1];
-        } else {
+        }
+        else
+        {
             std::cout << "Invalid choice." << std::endl;
             return;
         }
-    } else if (searchResults.size() == 1) {
+    }
+    else if (searchResults.size() == 1)
+    {
         selectedBook = searchResults[0];
-    } else {
+    }
+    else
+    {
         std::cout << "No book found with the given identifier." << std::endl;
         return;
     }
-    
+
     // Add the selected book to favorites
-    if (selectedBook) {
+    if (selectedBook)
+    {
         auto it = std::find(favoriteList.begin(), favoriteList.end(), selectedBook);
-        if (it == favoriteList.end()) {
+        if (it == favoriteList.end())
+        {
             selectedBook->isFavorite = true;
             favoriteList.push_back(selectedBook);
             std::cout << "Added to favorites: " << selectedBook->title << std::endl;
-        } else {
+        }
+        else
+        {
             std::cout << "Book is already in favorites." << std::endl;
         }
     }
 }
 
 // Method to remove a book from favorites
-void RBTree::removeFromFavorites(const std::string& bookIdentifier) {
+void RBTree::removeFromFavorites(const std::string &bookIdentifier)
+{
     auto it = std::find_if(favoriteList.begin(), favoriteList.end(),
-                           [&bookIdentifier](Node* book) {
-                               return book->data.find(bookIdentifier) != std::string::npos ;                           });
-    if (it != favoriteList.end()) {
+                           [&bookIdentifier](Node *book)
+                           { return book->data.find(bookIdentifier) != std::string::npos; });
+    if (it != favoriteList.end())
+    {
         (*it)->isFavorite = false;
         favoriteList.erase(it);
         std::cout << "Removed from favorites: " << (*it)->data << std::endl;
-    } else {
+    }
+    else
+    {
         std::cout << "Book not found in favorites." << std::endl;
     }
 }
 
 // Method to display favorite books
-void RBTree::displayFavorites() {
-    if (favoriteList.empty()) {
+void RBTree::displayFavorites()
+{
+    if (favoriteList.empty())
+    {
         std::cout << "No favorite books." << std::endl;
-    } else {
+    }
+    else
+    {
         std::cout << "Favorite Books:" << std::endl;
-        for (const auto& book : favoriteList) {
+        for (const auto &book : favoriteList)
+        {
             std::cout << book->title << " by " << book->data << std::endl;
         }
     }
 }
 
-void RBTree::merge(RBTree rbTree2) {
+void RBTree::merge(RBTree rbTree2)
+{
     string temp;
     Node *c, *temp_ptr;
     Node *root1 = root;
     Node *root2 = rbTree2.root;
     int initialblackheight1 = getBlackHeight(root1);
     int initialblackheight2 = getBlackHeight(root2);
-    if (initialblackheight1 > initialblackheight2) {
+    if (initialblackheight1 > initialblackheight2)
+    {
         c = maxValueNode(root1);
         temp = c->data;
         deleteValue(c->data);
         root1 = root;
     }
-    else if (initialblackheight2 > initialblackheight1) {
+    else if (initialblackheight2 > initialblackheight1)
+    {
         c = minValueNode(root2);
         temp = c->data;
         rbTree2.deleteValue(c->data);
         root2 = rbTree2.root;
     }
-    else {
+    else
+    {
         c = minValueNode(root2);
         temp = c->data;
         rbTree2.deleteValue(c->data);
         root2 = rbTree2.root;
-        if (initialblackheight1 != getBlackHeight(root2)) {
+        if (initialblackheight1 != getBlackHeight(root2))
+        {
             rbTree2.insertValue(c->data);
             root2 = rbTree2.root;
             c = maxValueNode(root1);
@@ -509,21 +612,24 @@ void RBTree::merge(RBTree rbTree2) {
             root1 = root;
         }
     }
-    setColor(c,RED);
+    setColor(c, RED);
     int finalblackheight1 = getBlackHeight(root1);
     int finalblackheight2 = getBlackHeight(root2);
-    if (finalblackheight1 == finalblackheight2) {
+    if (finalblackheight1 == finalblackheight2)
+    {
         c->left = root1;
         root1->parent = c;
         c->right = root2;
         root2->parent = c;
-        setColor(c,BLACK);
+        setColor(c, BLACK);
         c->data = temp;
         root = c;
     }
-    else if (finalblackheight2 > finalblackheight1) {
+    else if (finalblackheight2 > finalblackheight1)
+    {
         Node *ptr = root2;
-        while (finalblackheight1 != getBlackHeight(ptr)) {
+        while (finalblackheight1 != getBlackHeight(ptr))
+        {
             temp_ptr = ptr;
             ptr = ptr->left;
         }
@@ -540,18 +646,22 @@ void RBTree::merge(RBTree rbTree2) {
             ptr->parent = c;
         ptr_parent->left = c;
         c->parent = ptr_parent;
-        if (getColor(ptr_parent) == RED) {
+        if (getColor(ptr_parent) == RED)
+        {
             fixInsertRBTree(c);
         }
-        else if (getColor(ptr) == RED){
+        else if (getColor(ptr) == RED)
+        {
             fixInsertRBTree(ptr);
         }
         c->data = temp;
         root = root2;
     }
-    else {
+    else
+    {
         Node *ptr = root1;
-        while (finalblackheight2 != getBlackHeight(ptr)) {
+        while (finalblackheight2 != getBlackHeight(ptr))
+        {
             ptr = ptr->right;
         }
         Node *ptr_parent = ptr->parent;
@@ -561,10 +671,12 @@ void RBTree::merge(RBTree rbTree2) {
         ptr->parent = c;
         ptr_parent->right = c;
         c->parent = ptr_parent;
-        if (getColor(ptr_parent) == RED) {
+        if (getColor(ptr_parent) == RED)
+        {
             fixInsertRBTree(c);
         }
-        else if (getColor(ptr) == RED) {
+        else if (getColor(ptr) == RED)
+        {
             fixInsertRBTree(ptr);
         }
         c->data = temp;
