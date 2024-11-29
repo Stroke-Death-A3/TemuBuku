@@ -10,7 +10,6 @@
 #include <sstream>
 #include <algorithm> // Untuk std::transform
 
-// Kelas Book
 class Book {
 public:
     int id;
@@ -29,13 +28,12 @@ public:
           format(format), rating(rating), reviews(reviews), url(url) {}
 };
 
-// Kelas RBTree (sederhana)
 class RBTree {
     std::vector<Book> books;
 
 public:
     void insert(const Book& book) {
-        books.push_back(book); // Menambahkan buku ke dalam vector
+        books.push_back(book); 
     }
 
     std::vector<Book> search(const std::string& title) {
@@ -69,7 +67,7 @@ public:
                 data.push_back(token);
             }
 
-            if (data.size() >= 9) { // Pastikan ada cukup data
+            if (data.size() >= 9) { 
                 int id = std::stoi(data[0]);
                 std::string title = data[1];
                 std::string author = data[2];
@@ -120,13 +118,11 @@ int main(int, char**) {
 
     ImVec4 clear_color = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
 
-    // Inisialisasi RBTree dan memuat data dari CSV
     RBTree bookTree;
     bookTree.loadFromCSV("Books_df.csv");
 
-    // Variabel untuk menyimpan hasil pencarian
     std::vector<Book> searchResults;
-    char buffer[256] = ""; // Deklarasi buffer untuk input pencarian
+    char buffer[256] = ""; 
 
     while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -135,7 +131,6 @@ int main(int, char**) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // Tampilkan input pencarian
     ImGui::SetNextWindowPos(ImVec2(100, 100));
     ImGui::SetNextWindowSize(ImVec2(300, 50));
     ImGui::Begin("Search", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
