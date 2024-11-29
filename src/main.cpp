@@ -129,33 +129,33 @@ int main(int, char**) {
     char buffer[256] = ""; // Deklarasi buffer untuk input pencarian
 
     while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
+    glfwPollEvents();
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
 
-        // Tampilkan input pencarian
-        ImGui::SetNextWindowPos(ImVec2(100, 100));
-        ImGui::SetNextWindowSize(ImVec2(300, 50));
-        ImGui::Begin("Search", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-        ImGui::InputText("##search", buffer, IM_ARRAYSIZE(buffer));
-        ImGui::SameLine();
-        if (ImGui::Button("Search")) {
-            std::cout << "Searching for: " << buffer << std::endl; // Debug
-            searchResults = bookTree.search(buffer);
-            std::cout << "Found " << searchResults.size() << " results." << std::endl; // Debug
-        }
-        ImGui::End();
+    // Tampilkan input pencarian
+    ImGui::SetNextWindowPos(ImVec2(100, 100));
+    ImGui::SetNextWindowSize(ImVec2(300, 50));
+    ImGui::Begin("Search", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+    ImGui::InputText("##search", buffer, IM_ARRAYSIZE(buffer));
+    ImGui::SameLine();
+    if (ImGui::Button("Search")) {
+        std::cout << "Searching for: " << buffer << std::endl; // Debug
+        searchResults = bookTree.search(buffer);
+        std::cout << "Found " << searchResults.size() << " results." << std::endl; // Debug
+    }
+    ImGui::End();
 
-        // Tampilkan hasil pencarian
-        ImGui::SetNextWindowPos(ImVec2(100, 200));
-        ImGui::SetNextWindowSize(ImVec2(600, 400));
-        ImGui::Begin("Search Results", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-        for (const auto& book : searchResults) {
-            ImGui::Text("%d. %s", book.id, book.title.c_str());
-        }
-        ImGui::End();
+    // Tampilkan hasil pencarian
+    ImGui::SetNextWindowPos(ImVec2(100, 200));
+    ImGui::SetNextWindowSize(ImVec2(600, 400));
+    ImGui::Begin("Search Results", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+    for (const auto& book : searchResults) {
+        ImGui::Text("%d. %s", book.id, book.title.c_str());
+    }
+    ImGui::End();
 
         ImGui::Render();
         int display_w, display_h;
