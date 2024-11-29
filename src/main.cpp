@@ -2,16 +2,96 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>
-#define GL_SILENCE_DEPRECATION
-#include <GLFW/glfw3.h> 
+#include <GLFW/glfw3.h>
+#include <string>
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <algorithm> // Untuk std::transform
 
-static void glfw_error_callback(int error, const char* description)
-{
+// Kelas Book
+class Book {
+public:
+    int id;
+    std::string title;
+    std::string author;
+    std::string category;
+    std::string subcategory;
+    std::string format;
+    double rating;
+    double reviews;
+    std::string url;
+
+    Book(int id, const std::string& title, const std::string& author, const std::string& category,
+         const std::string& subcategory, const std::string& format, double rating, double reviews, const std::string& url)
+        : id(id), title(title), author(author), category(category), subcategory(subcategory),
+          format(format), rating(rating), reviews(reviews), url(url) {}
+};
+
+// Kelas RBTree (sederhana)
+class RBTree {
+    std::vector<Book> books;
+
+public:
+    void insert(const Book& book) {
+        books.push_back(book); // Menambahkan buku ke dalam vector
+    }
+
+    std::vector<Book> search(const std::string& title) {
+        std::vector<Book> results;
+        std::string lowerTitle = title;
+        
+        // Ubah kata kunci menjadi huruf kecil
+        std::transform(lowerTitle.begin(), lowerTitle.end(), lowerTitle.begin(), ::tolower);
+
+        for (const auto& book : books) {
+            std::string lowerBookTitle = book.title;
+            // Ubah judul buku menjadi huruf kecil
+            std::transform(lowerBookTitle.begin(), lowerBookTitle.end(), lowerBookTitle.begin(), ::tolower);
+
+            if (lowerBookTitle.find(lowerTitle) != std::string::npos) {
+                results.push_back(book);
+            }
+        }
+        return results;
+    }
+
+    void loadFromCSV(const std::string& filename) {
+        std::ifstream file(filename);
+        std::string line;
+        while (std::getline(file, line)) {
+            std::stringstream ss(line);
+            std::string token;
+            std::vector<std::string> data;
+
+            while (std::getline(ss, token, ',')) {
+                data.push_back(token);
+            }
+
+            if (data.size() >= 9) { // Pastikan ada cukup data
+                int id = std::stoi(data[0]);
+                std::string title = data[1];
+                std::string author = data[2];
+                std::string category = data[3];
+                std::string subcategory = data[4];
+                std::string format = data[5];
+                double rating = std::stod(data[6]);
+                double reviews = std::stod(data[7]);
+                std::string url = data[8];
+
+                insert(Book(id, title, author, category, subcategory, format, rating, reviews, url));
+            }
+        }
+        std::cout << "Loaded " << books.size() << " books from CSV." << std::endl; // Debug
+    }
+};
+
+static void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
-int main(int, char**)
-{
+int main(int, char**) {
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit()) {
         fprintf(stderr, "Failed to initialize GLFW\n");
@@ -27,8 +107,8 @@ int main(int, char**)
         fprintf(stderr, "Failed to create GLFW window\n");
         return 1;
     }
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); 
+    glfwMakeContextCurrent(window); // Perbaiki pengetikan di sini
+    glfwSwapInterval(1);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -40,95 +120,42 @@ int main(int, char**)
 
     ImVec4 clear_color = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
 
-    // Load fonts
-    ImFont* judul_utama = io.Fonts->AddFontFromFileTTF("../font/AntipastoPro-Bold_trial.ttf", 50.0f);
-    ImFont* font_quotes = io.Fonts->AddFontFromFileTTF("../font/AntipastoPro-Bold_trial.ttf", 20.0f);
-    ImFont* font_elemen = io.Fonts->AddFontFromFileTTF("../font/AntipastoPro-Bold_trial.ttf", 25.0f);
+    // Inisialisasi RBTree dan memuat data dari CSV
+    RBTree bookTree;
+    bookTree.loadFromCSV("Books_df.csv");
 
-    static char buffer[256] = ""; 
-    // Warna abu-abu dongker
-    ImVec4 dark_gray = ImVec4(0.2f, 0.2f, 0.2f, 1.0f); // RGB: (51, 51, 51)
+    // Variabel untuk menyimpan hasil pencarian
+    std::vector<Book> searchResults;
+    char buffer[256] = ""; // Deklarasi buffer untuk input pencarian
 
-    while (!glfwWindowShouldClose(window))
-    {
+    while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Always);
-        ImGui::Begin("Main Window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-
-        ImVec2 screen_center = ImVec2(640, 720 / 2); // Define the center point of the screen
-
-        // Judul: Align Center with Play Chickens font
-        ImGui::PushFont(judul_utama);
-        ImVec2 text_size = ImGui::CalcTextSize("Selamat datang di TemuBuku!");
-        ImVec2 text_pos = ImVec2(screen_center.x - text_size.x / 2, screen_center.y - 300); // Slightly above center
-        ImGui::GetForegroundDrawList()->AddText(text_pos, IM_COL32(255, 255, 255, 255), "Selamat datang di TemuBuku!");
-        ImGui::PopFont();
-
-        // Input Field: Set manual position
-        float input_pos_x = 200.0f;
-        float input_pos_y = 180.0f;
-
-        // Label: Set manual position
-        float label_pos_x = input_pos_x + 300;
-        float label_pos_y = input_pos_y - 28.0f;
-
-        // Set position for the label and input field
-        ImGui::PushFont(font_elemen);
-        ImGui::SetCursorPos(ImVec2(label_pos_x, label_pos_y - 10)); 
-        ImGui::Text("Masukkan nama buku:");
-        ImGui::PopFont();
-
-        // Set position and style for input field
-        ImGui::PushFont(font_quotes);
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f); // Set corner radius to 5
-
-        // Ganti warna input field ke abu-abu dongker
-        ImGui::PushStyleColor(ImGuiCol_FrameBg, dark_gray); // Background warna input field
-        ImGui::PushStyleColor(ImGuiCol_Border, IM_COL32(100, 100, 100, 255)); // Border warna abu-abu lebih terang
-
-        ImGui::SetCursorPos(ImVec2(input_pos_x, input_pos_y)); 
-        ImGui::InputText("##Input", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_EnterReturnsTrue);
-        
-        ImGui::PopStyleColor(2); // Pop warna input field dan border
-        ImGui::PopStyleVar(); // Restore rounding
-        ImGui::PopFont();
-
-        // Tombol: Set center position horizontally
-        ImGui::PushFont(font_elemen);
-        ImGui::SetCursorPosY(screen_center.y - 140);
-        ImGui::SetCursorPosX((1280 - 300) / 2);
-
-        // Tombol dengan warna abu-abu dongker
-        ImVec2 button_size = ImVec2(300, 40);
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-
-        // Ganti warna tombol ke abu-abu dongker
-        ImGui::PushStyleColor(ImGuiCol_Button, dark_gray);
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(120, 120, 120, 255)); // Hovered lebih terang
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, IM_COL32(90, 90, 90, 255)); // Active lebih gelap
-
-        if (ImGui::Button("Cari Buku", button_size)) {
-            printf("Input: %s\n", buffer);
+        // Tampilkan input pencarian
+        ImGui::SetNextWindowPos(ImVec2(100, 100));
+        ImGui::SetNextWindowSize(ImVec2(300, 50));
+        ImGui::Begin("Search", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+        ImGui::InputText("##search", buffer, IM_ARRAYSIZE(buffer));
+        ImGui::SameLine();
+        if (ImGui::Button("Search")) {
+            std::cout << "Searching for: " << buffer << std::endl; // Debug
+            searchResults = bookTree.search(buffer);
+            std::cout << "Found " << searchResults.size() << " results." << std::endl; // Debug
         }
+        ImGui::End();
 
-        ImGui::PopStyleColor(3); // Pop warna tombol
-        ImGui::PopStyleVar(2); // Restore padding dan rounding
-        ImGui::PopFont();        // Bottom Text: Set center position horizontally using Roboto font
-        ImGui::PushFont(font_quotes);
-        ImVec2 bottom_text_size = ImGui::CalcTextSize("Cari buku, temukan cerita. TemuBuku hadir untuk menjelajah, memilih dan membaca tanpa batas!");
-        float bottom_text_pos_x = (1280 - bottom_text_size.x) / 2; // Center text horizontally
-        float bottom_text_pos_y = screen_center.y + 300; // Set position for bottom text
-        ImGui::SetCursorPos(ImVec2(bottom_text_pos_x, bottom_text_pos_y)); 
-        ImGui::Text("Cari buku, temukan cerita. TemuBuku hadir untuk menjelajah, memilih dan membaca tanpa batas!");
-        ImGui::PopFont();
-
-        ImGui::End(); // End main window
+        // Tampilkan hasil pencarian
+        ImGui::SetNextWindowPos(ImVec2(100, 200));
+        ImGui::SetNextWindowSize(ImVec2(600, 400));
+        ImGui::Begin("Search Results", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+        for (const auto& book : searchResults) {
+            ImGui::Text("%d. %s", book.id, book.title.c_str());
+        }
+        ImGui::End();
 
         ImGui::Render();
         int display_w, display_h;
@@ -144,6 +171,7 @@ int main(int, char**)
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+
     glfwDestroyWindow(window);
     glfwTerminate();
 
