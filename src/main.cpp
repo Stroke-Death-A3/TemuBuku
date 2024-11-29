@@ -8,7 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <algorithm> // Untuk std::transform
+#include <algorithm>
 
 class Book {
 public:
@@ -33,22 +33,24 @@ class RBTree {
 
 public:
     void insert(const Book& book) {
-        books.push_back(book); 
+        books.push_back(book);
     }
 
-    std::vector<Book> search(const std::string& title) {
+    std::vector<Book> search(const std::string& keyword) {
         std::vector<Book> results;
-        std::string lowerTitle = title;
-        
-        // Ubah kata kunci menjadi huruf kecil
-        std::transform(lowerTitle.begin(), lowerTitle.end(), lowerTitle.begin(), ::tolower);
+        std::string lowerKeyword = keyword;
+
+        // Ubah keyword menjadi huruf kecil
+        std::transform(lowerKeyword.begin(), lowerKeyword.end(), lowerKeyword.begin(), ::tolower);
 
         for (const auto& book : books) {
-            std::string lowerBookTitle = book.title;
-            // Ubah judul buku menjadi huruf kecil
-            std::transform(lowerBookTitle.begin(), lowerBookTitle.end(), lowerBookTitle.begin(), ::tolower);
+            std::string lowerTitle = book.title;
 
-            if (lowerBookTitle.find(lowerTitle) != std::string::npos) {
+            // Ubah judul buku menjadi huruf kecil
+            std::transform(lowerTitle.begin(), lowerTitle.end(), lowerTitle.begin(), ::tolower);
+
+            // Cari keyword dalam title
+            if (lowerTitle.find(lowerKeyword) != std::string::npos) {
                 results.push_back(book);
             }
         }
@@ -57,8 +59,19 @@ public:
 
     void loadFromCSV(const std::string& filename) {
         std::ifstream file(filename);
+        if (!file.is_open()) {
+            std::cerr << "Error: Could not open file " << filename << std::endl;
+            return;
+        }
+
         std::string line;
+        bool isHeader = true; // Flag untuk melewati header
         while (std::getline(file, line)) {
+            if (isHeader) {
+                isHeader = false; // Lewati baris pertama (header)
+                continue;
+            }
+
             std::stringstream ss(line);
             std::string token;
             std::vector<std::string> data;
@@ -67,22 +80,29 @@ public:
                 data.push_back(token);
             }
 
-            if (data.size() >= 9) { 
-                int id = std::stoi(data[0]);
-                std::string title = data[1];
-                std::string author = data[2];
-                std::string category = data[3];
-                std::string subcategory = data[4];
-                std::string format = data[5];
-                double rating = std::stod(data[6]);
-                double reviews = std::stod(data[7]);
-                std::string url = data[8];
+            if (data.size() >= 10) { // Pastikan jumlah kolom cukup
+                try {
+                    int id = std::stoi(data[0]);
+                    std::string title = data[1];
+                    std::string author = data[2];
+                    std::string category = data[3];
+                    std::string subcategory = data[4];
+                    std::string format = data[5];
+                    double rating = std::stod(data[7]);
+                    double reviews = std::stod(data[8]);
+                    std::string url = data[9];
 
-                insert(Book(id, title, author, category, subcategory, format, rating, reviews, url));
+                    insert(Book(id, title, author, category, subcategory, format, rating, reviews, url));
+                } catch (const std::exception& e) {
+                    std::cerr << "Error parsing line: " << line << " - " << e.what() << std::endl;
+                }
+            } else {
+                std::cerr << "Invalid data line: " << line << std::endl;
             }
         }
-        std::cout << "Loaded " << books.size() << " books from CSV." << std::endl; // Debug
+        std::cout << "Loaded " << books.size() << " books from CSV." << std::endl;
     }
+
 };
 
 static void glfw_error_callback(int error, const char* description) {
@@ -105,7 +125,7 @@ int main(int, char**) {
         fprintf(stderr, "Failed to create GLFW window\n");
         return 1;
     }
-    glfwMakeContextCurrent(window); // Perbaiki pengetikan di sini
+    glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
     IMGUI_CHECKVERSION();
@@ -119,38 +139,40 @@ int main(int, char**) {
     ImVec4 clear_color = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
 
     RBTree bookTree;
-    bookTree.loadFromCSV("Books_df.csv");
+    bookTree.loadFromCSV("../Process/datasets/Books_df.csv");
 
     std::vector<Book> searchResults;
-    char buffer[256] = ""; 
+    char buffer[256] = "";
 
     while (!glfwWindowShouldClose(window)) {
-    glfwPollEvents();
+        glfwPollEvents();
 
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
 
-    ImGui::SetNextWindowPos(ImVec2(100, 100));
-    ImGui::SetNextWindowSize(ImVec2(300, 50));
-    ImGui::Begin("Search", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-    ImGui::InputText("##search", buffer, IM_ARRAYSIZE(buffer));
-    ImGui::SameLine();
-    if (ImGui::Button("Search")) {
-        std::cout << "Searching for: " << buffer << std::endl; // Debug
-        searchResults = bookTree.search(buffer);
-        std::cout << "Found " << searchResults.size() << " results." << std::endl; // Debug
-    }
-    ImGui::End();
+        ImGui::SetNextWindowPos(ImVec2(100, 100));
+        ImGui::SetNextWindowSize(ImVec2(400, 100));
+        ImGui::Begin("Search", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+        ImGui::InputText("##search", buffer, IM_ARRAYSIZE(buffer));
+        ImGui::SameLine();
+        if (ImGui::Button("Search")) {
+            searchResults = bookTree.search(buffer);
+        }
+        ImGui::End();
 
-    // Tampilkan hasil pencarian
-    ImGui::SetNextWindowPos(ImVec2(100, 200));
-    ImGui::SetNextWindowSize(ImVec2(600, 400));
-    ImGui::Begin("Search Results", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-    for (const auto& book : searchResults) {
-        ImGui::Text("%d. %s", book.id, book.title.c_str());
-    }
-    ImGui::End();
+        // Tampilkan hasil pencarian
+        ImGui::SetNextWindowPos(ImVec2(100, 220));
+        ImGui::SetNextWindowSize(ImVec2(800, 400));
+        ImGui::Begin("Search Results", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+        if (!searchResults.empty()) {
+            for (const auto& book : searchResults) {
+                ImGui::Text("ID: %d | Title: %s | Author: %s | Category: %s", book.id, book.title.c_str(), book.author.c_str(), book.category.c_str());
+            }
+        } else {
+            ImGui::Text("No results found.");
+        }
+        ImGui::End();
 
         ImGui::Render();
         int display_w, display_h;
