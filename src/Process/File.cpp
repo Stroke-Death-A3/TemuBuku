@@ -1,6 +1,5 @@
 #include "../core/File.h"
 #include "../core/Book.h"
-#include "../core/global.h"
 #include <algorithm>
 
 std::vector<std::string> File::splitCSVLine(const std::string &line)
