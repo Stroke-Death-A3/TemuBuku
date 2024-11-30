@@ -11,15 +11,17 @@ std::vector<std::string> File::splitCSVLine(const std::string &line)
     for (size_t i = 0; i < line.length(); ++i)
     {
         char ch = line[i];
+
         if (ch == '"')
         {
             inQuotes = !inQuotes;
         }
-        else if (ch == ',' && !inQuotes)
+        else if ((ch == ';') && !inQuotes)
         {
-            // Trim whitespace from the field
-            currentField.erase(0, currentField.find_first_not_of(" \t"));
-            currentField.erase(currentField.find_last_not_of(" \t") + 1);
+            // Remove surrounding quotes if present
+            if (!currentField.empty() && currentField.front() == '"' && currentField.back() == '"') {
+                currentField = currentField.substr(1, currentField.length() - 2);
+            }
             result.push_back(currentField);
             currentField.clear();
         }
@@ -29,10 +31,14 @@ std::vector<std::string> File::splitCSVLine(const std::string &line)
         }
     }
 
-    // Add the last field
-    currentField.erase(0, currentField.find_first_not_of(" \t"));
-    currentField.erase(currentField.find_last_not_of(" \t") + 1);
-    result.push_back(currentField);
+    // Don't forget to add the last field
+    if (!currentField.empty())
+    {
+        if (currentField.front() == '"' && currentField.back() == '"') {
+            currentField = currentField.substr(1, currentField.length() - 2);
+        }
+        result.push_back(currentField);
+    }
 
     return result;
 }
@@ -50,7 +56,7 @@ T File::stringToType(const std::string &str)
     }
 
     // Remove commas from numeric strings
-    numStr.erase(std::remove(numStr.begin(), numStr.end(), ','), numStr.end());
+    numStr.erase(std::remove(numStr.begin(), numStr.end(), ';'), numStr.end());
 
     try
     {
@@ -113,7 +119,7 @@ void File::parseFile()
             auto fields = splitCSVLine(line);
 
             // Ensure we have enough fields
-            if (fields.size() < 10)
+            if (fields.size() < 8)  // Changed from 10 to 8
             {
                 std::cerr << "Insufficient fields in line: " << line << std::endl;
                 continue;
@@ -124,12 +130,12 @@ void File::parseFile()
                 stringToType<int>(fields[0]),    // id
                 fields[1],                       // title
                 fields[2],                       // author
-                fields[3],                       // category
-                fields[4],                       // subcategory
-                fields[5],                       // format
-                stringToType<double>(fields[7]), // rating
-                stringToType<double>(fields[8]), // reviews
-                fields[9],                       // url
+                fields[3],                       // category/year
+                fields[4],                       // publisher
+                "",                             // format (empty)
+                0.0,                            // default rating
+                0.0,                            // default reviews
+                fields[5],                      // url (first URL)
                 &rbTree);
 
              std::string bookKey = std::to_string(book.getId()) + "|" + 

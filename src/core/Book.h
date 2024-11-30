@@ -62,7 +62,7 @@ public:
 
         
 
-        while (std::getline(ss, item, ',')) {
+        while (std::getline(ss, item, ';')) {
 
             parts.push_back(item);
 

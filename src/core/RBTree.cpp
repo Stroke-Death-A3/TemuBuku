@@ -98,25 +98,48 @@ std::vector<Node *> RBTree::searchBST(Node *root, Node *ptr)
 }
 
 std::vector<Node*> RBTree::searchValue(std::string& n) {
-    // Check if the input string is "random"
     if (n == "random") {
+        // Vector to store all ISBNs
+        std::vector<std::string> existingISBNs;
+        
+        // Helper function to collect ISBNs (define this separately)
+        std::function<void(Node*)> collectISBNs = [&](Node* node) {
+            if (node == nullptr) return;
+            
+            // Extract ISBN from node data
+            std::string nodeData = node->data;
+            size_t delimPos = nodeData.find('|');
+            if (delimPos != std::string::npos) {
+                existingISBNs.push_back(nodeData.substr(0, delimPos));
+            }
+            
+            collectISBNs(node->left);
+            collectISBNs(node->right);
+        };
+        
+        // Collect all ISBNs
+        collectISBNs(root);
+        
+        if (existingISBNs.empty()) {
+            std::cout << "No books in database" << std::endl;
+            return std::vector<Node*>();
+        }
+        
+        // Generate random index
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_int_distribution<> distrib(1000, 9999);
-        int randomNum = distrib(gen);
-        n = std::to_string(randomNum);
+        std::uniform_int_distribution<> distrib(0, existingISBNs.size() - 1);
+        
+        // Select random ISBN
+        n = existingISBNs[distrib(gen)];
     }
-
-    // Create a temporary Node for the search
+    
+    // Create node and search
     Node* node = new Node(n);
-
-    // Search the RBT for nodes containing the specified string
-    std::vector<Node*> temp_result = searchBST(this->root, node);
-
-    // Delete the temporary Node
+    std::vector<Node*> results = searchBST(root, node);
     delete node;
-
-    return temp_result;
+    
+    return results;
 }
 void RBTree::insertValue(string n)
 {

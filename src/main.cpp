@@ -59,7 +59,7 @@ int main(int, char **)
     ImVec4 clear_color = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
 
     // Book search setup
-    std::string path = "../Process/datasets/Books_df.csv";
+    std::string path = "../Process/datasets/books.csv";
     RBTree rbtree1;
     File fileHandler(rbtree1);
 
