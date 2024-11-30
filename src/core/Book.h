@@ -8,7 +8,7 @@
 
 class Book {
 private:
-    int id;
+    long long id;
     std::string title;
     std::string author;
     std::string category;
@@ -30,7 +30,7 @@ public:
       rbTree(_rbTree ? *_rbTree : *(new RBTree())), 
       root(nullptr) {}
 
-    int getId() const { return id; }
+    long long getId() const { return id; }
     std::string getTitle() const { return title; }
     std::string getAuthor() const { return author; }
     std::string getCategory() const { return category; }

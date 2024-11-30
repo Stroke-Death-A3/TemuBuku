@@ -1,7 +1,7 @@
 #include "../core/File.h"
 #include "../core/Book.h"
 #include <algorithm>
-
+#include <limits>
 std::vector<std::string> File::splitCSVLine(const std::string &line)
 {
     std::vector<std::string> result;
@@ -48,6 +48,11 @@ T File::stringToType(const std::string &str)
 {
     std::string numStr = str;
 
+    // Remove quotes if present
+    if (numStr.front() == '"' && numStr.back() == '"') {
+        numStr = numStr.substr(1, numStr.length() - 2);
+    }
+
     // Remove currency symbols
     size_t pos = numStr.find_first_of("₹$€£");
     if (pos != std::string::npos)
@@ -56,13 +61,31 @@ T File::stringToType(const std::string &str)
     }
 
     // Remove commas from numeric strings
-    numStr.erase(std::remove(numStr.begin(), numStr.end(), ';'), numStr.end());
+    numStr.erase(std::remove(numStr.begin(), numStr.end(), ','), numStr.end());
 
     try
     {
         if constexpr (std::is_same_v<T, int>)
         {
-            return std::stoi(numStr);
+            // Try converting to long long first
+            long long longValue = std::stoll(numStr);
+            
+            // If the value is too large for int, return 0 or use a default strategy
+            if (longValue > std::numeric_limits<int>::max() || 
+                longValue < std::numeric_limits<int>::min())
+            {
+                std::cerr << "Number too large for int: " << longValue 
+                          << ". Using last 4 digits." << std::endl;
+                
+                // Strategy: Use last 4 digits
+                return static_cast<int>(longValue % 10000);
+            }
+            
+            return static_cast<int>(longValue);
+        }
+        else if constexpr (std::is_same_v<T, long long>)
+        {
+            return std::stoll(numStr);
         }
         else if constexpr (std::is_same_v<T, double>)
         {
@@ -71,9 +94,8 @@ T File::stringToType(const std::string &str)
     }
     catch (const std::invalid_argument &e)
     {
-        // Log the error but provide a default value
         std::cerr << "Conversion error for: " << str << " - " << e.what() << std::endl;
-        return 0; // or some other appropriate default
+        return 0;
     }
     catch (const std::out_of_range &e)
     {
