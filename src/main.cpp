@@ -12,6 +12,7 @@
 #include "./core/Book.h"
 #include "./core/RBTree.cpp"
 #include "./Process/File.cpp"
+
 static void glfw_error_callback(int error, const char *description)
 {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
@@ -46,7 +47,13 @@ int main(int, char **)
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
-    (void)io;
+
+    // Load custom font
+    ImFont* customFont = io.Fonts->AddFontFromFileTTF("../font/AntipastoPro-Bold_trial.ttf", 16.0f); // Regular size
+    ImFont* titleFont = io.Fonts->AddFontFromFileTTF("../font/Roboto-Regular.ttf", 16.0f);  // Larger for titles
+
+    // Set default font
+    io.FontDefault = titleFont;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -107,11 +114,15 @@ int main(int, char **)
                          ImGuiWindowFlags_NoMove |
                          ImGuiWindowFlags_NoCollapse);
 
-        // Search bar
+        // Use title font for header
+        ImGui::PushFont(titleFont);
         ImGui::Text("Book Search : ");
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.7f);
+        ImGui::PopFont();
 
+        ImGui::SameLine();
+
+        // Search bar (uses default font)
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.7f);
         bool searchTriggered = false;
 
         // Handle Enter key in input
@@ -137,12 +148,12 @@ int main(int, char **)
         }
 
         // Display results section
-        // Display results section
-        // Display results section
         ImGui::Separator();
         if (!searchResults.empty())
         {
+            ImGui::PushFont(titleFont);
             ImGui::Text("Found %d matches:", searchResults.size());
+            ImGui::PopFont();
             bool alternate = false;
 
             // Main scrollable container
@@ -202,7 +213,9 @@ int main(int, char **)
         if (ImGui::BeginPopupModal("Book Details", nullptr,
                                    ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
         {
+            ImGui::PushFont(customFont);
             ImGui::Text("Book Information");
+            ImGui::PopFont();
             ImGui::Separator();
             Book book(1, "title", "author", "category", "subcategory", "format", 4.5, 1000, "url");
             ImGui::Text("ID: %d", book.getId());
