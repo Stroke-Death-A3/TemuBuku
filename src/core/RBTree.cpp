@@ -61,28 +61,39 @@ bool RBTree::areSimiliar(const std::string &str1, const std::string &str2)
 
     return base1 == base2;
 }
-
-std::vector<Node *> RBTree::searchBST(Node *root, Node *ptr)
+std::vector<Node *> RBTree::searchBST(Node *root, Node *ptr) 
 {
     std::vector<Node *> temp_result;
-    if (root == nullptr)
-    {
+    if (root == nullptr) {
         return temp_result;
     }
 
-    // Convert search term to lowercase for comparison
+    // Get search term
     std::string searchTerm = ptr->data;
     std::transform(searchTerm.begin(), searchTerm.end(), searchTerm.begin(), ::tolower);
 
-    // Convert current node's data to lowercase for comparison
+    // Get node data
     std::string nodeData = root->data;
     std::transform(nodeData.begin(), nodeData.end(), nodeData.begin(), ::tolower);
 
-    // Check if the current node's data contains the search term
-    // or if search term contains the current node's data
-    if (nodeData.find(searchTerm) != std::string::npos ||
-        searchTerm.find(nodeData) != std::string::npos)
-    {
+    // Split node data into fields
+    std::vector<std::string> fields;
+    std::stringstream ss(nodeData);
+    std::string field;
+    while (getline(ss, field, '|')) {
+        fields.push_back(field);
+    }
+
+    // Search in all fields (ISBN, title, author, publisher)
+    bool found = false;
+    for (const auto& field : fields) {
+        if (field.find(searchTerm) != std::string::npos) {
+            found = true;
+            break;
+        }
+    }
+
+    if (found) {
         temp_result.push_back(root);
     }
 
@@ -90,7 +101,6 @@ std::vector<Node *> RBTree::searchBST(Node *root, Node *ptr)
     std::vector<Node *> left_result = searchBST(root->left, ptr);
     std::vector<Node *> right_result = searchBST(root->right, ptr);
 
-    // Combine temp_results
     temp_result.insert(temp_result.end(), left_result.begin(), left_result.end());
     temp_result.insert(temp_result.end(), right_result.begin(), right_result.end());
 
@@ -99,25 +109,23 @@ std::vector<Node *> RBTree::searchBST(Node *root, Node *ptr)
 
 std::vector<Node*> RBTree::searchValue(std::string& n) {
     if (n == "random") {
-        // Vector to store all ISBNs
+        // Collect only ISBNs
         std::vector<std::string> existingISBNs;
-        
-        // Helper function to collect ISBNs (define this separately)
         std::function<void(Node*)> collectISBNs = [&](Node* node) {
             if (node == nullptr) return;
             
-            // Extract ISBN from node data
+            // Extract ISBN from node data (before first '|')
             std::string nodeData = node->data;
-            size_t delimPos = nodeData.find('|');
-            if (delimPos != std::string::npos) {
-                existingISBNs.push_back(nodeData.substr(0, delimPos));
+            size_t pos = nodeData.find('|');
+            if (pos != std::string::npos) {
+                std::string isbn = nodeData.substr(0, pos);
+                existingISBNs.push_back(isbn);
             }
             
             collectISBNs(node->left);
             collectISBNs(node->right);
         };
         
-        // Collect all ISBNs
         collectISBNs(root);
         
         if (existingISBNs.empty()) {
@@ -125,20 +133,29 @@ std::vector<Node*> RBTree::searchValue(std::string& n) {
             return std::vector<Node*>();
         }
         
-        // Generate random index
+        // Debug: Print available ISBNs count
+        std::cout << "Found " << existingISBNs.size() << " ISBNs" << std::endl;
+        
+        // Select random ISBN
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> distrib(0, existingISBNs.size() - 1);
         
-        // Select random ISBN
+        // Get random ISBN
         n = existingISBNs[distrib(gen)];
+        std::cout << "Selected random ISBN: " << n << std::endl;
+        
+        // Search using ISBN
+        Node* node = new Node(n);
+        std::vector<Node*> results = searchBST(root, node);
+        delete node;
+        
+        return results;
     }
-    
-    // Create node and search
+    // Non-random search remains unchanged
     Node* node = new Node(n);
     std::vector<Node*> results = searchBST(root, node);
     delete node;
-    
     return results;
 }
 void RBTree::insertValue(string n)
