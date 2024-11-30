@@ -137,43 +137,52 @@ int main(int, char **)
         }
 
         // Display results section
+        // Display results section
+        // Display results section
         ImGui::Separator();
         if (!searchResults.empty())
         {
             ImGui::Text("Found %d matches:", searchResults.size());
             bool alternate = false;
 
+            // Main scrollable container
+            ImGui::BeginChild("SearchResults", ImVec2(0, ImGui::GetWindowHeight() * 0.7f), true);
+
             for (Node *result : searchResults)
             {
-                // Create unique ID for each item to prevent blending
                 ImGui::PushID(result);
 
+                // Create child window for each row
                 if (alternate)
                 {
-                    // Dark blue background
-                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.220f, 0.419f, 0.553f, 1.0f));       // Dark blue base
-                    ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.0f, 0.0f, 0.5f, 1.0f));        // Slightly lighter when selected
-                    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.1f, 0.1f, 0.6f, 1.0f)); // Lightest on hover
+                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.220f, 0.419f, 0.553f, 1.0f));
                 }
                 else
                 {
-                    // Black background
-                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));       // Black base
-                    ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));        // Dark gray when selected
-                    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.2f, 0.2f, 0.2f, 1.0f)); // Lighter gray on hover
+                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
                 }
 
-                ImGui::BeginChild(("Row" + std::to_string(alternate)).c_str(), ImVec2(0, 25), true);
-                if (ImGui::Selectable(result->data.c_str(), false, 0, ImVec2(0, 25)))
+                // Fixed height child window for each row
+                ImGui::BeginChild(("Row" + std::to_string(reinterpret_cast<intptr_t>(result))).c_str(),
+                                  ImVec2(0, 25.0f), true,
+                                  ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+                // Selectable with same width as child window
+                if (ImGui::Selectable(result->data.c_str(), false,
+                                      ImGuiSelectableFlags_None,
+                                      ImVec2(0, 25.0f)))
                 {
-                    // Handle selection
+                    showDetailsModal = true;
                 }
-                ImGui::EndChild();
 
-                ImGui::PopStyleColor(3);
+                ImGui::EndChild();
+                ImGui::PopStyleColor();
                 ImGui::PopID();
+
                 alternate = !alternate;
             }
+
+            ImGui::EndChild(); // End main scrollable container
         }
         else if (searchTriggered) // Only show "No results" if a search was performed
         {
