@@ -80,7 +80,7 @@ int main(int, char **)
 
     bool showDetailsModal = false;
 
-    std::vector<Node*> searchResults;  // Store results persistently
+    std::vector<Node *> searchResults; // Store results persistently
 
     File file(rbtree1);
 
@@ -108,7 +108,7 @@ int main(int, char **)
                          ImGuiWindowFlags_NoCollapse);
 
         // Search bar
-        ImGui::Text("Book Search");
+        ImGui::Text("Book Search : ");
         ImGui::SameLine();
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.7f);
 
@@ -141,15 +141,41 @@ int main(int, char **)
         if (!searchResults.empty())
         {
             ImGui::Text("Found %d matches:", searchResults.size());
+            bool alternate = false;
+
             for (Node *result : searchResults)
             {
-                if (ImGui::Selectable(result->data.c_str()))
+                // Create unique ID for each item to prevent blending
+                ImGui::PushID(result);
+
+                if (alternate)
                 {
-                    // Handle selection if needed
+                    // Dark blue background
+                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.220f, 0.419f, 0.553f, 1.0f));       // Dark blue base
+                    ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.0f, 0.0f, 0.5f, 1.0f));        // Slightly lighter when selected
+                    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.1f, 0.1f, 0.6f, 1.0f)); // Lightest on hover
                 }
+                else
+                {
+                    // Black background
+                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));       // Black base
+                    ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));        // Dark gray when selected
+                    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.2f, 0.2f, 0.2f, 1.0f)); // Lighter gray on hover
+                }
+
+                ImGui::BeginChild(("Row" + std::to_string(alternate)).c_str(), ImVec2(0, 25), true);
+                if (ImGui::Selectable(result->data.c_str(), false, 0, ImVec2(0, 25)))
+                {
+                    // Handle selection
+                }
+                ImGui::EndChild();
+
+                ImGui::PopStyleColor(3);
+                ImGui::PopID();
+                alternate = !alternate;
             }
         }
-        else if (searchTriggered)  // Only show "No results" if a search was performed
+        else if (searchTriggered) // Only show "No results" if a search was performed
         {
             ImGui::SetCursorPosX((ImGui::GetWindowWidth() - ImGui::CalcTextSize("No results found.").x) * 0.5f);
             ImGui::Text("No results found.");

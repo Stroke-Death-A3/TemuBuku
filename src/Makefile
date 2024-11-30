@@ -10,7 +10,7 @@
 #   pacman -S --noconfirm --needed mingw-w64-x86_64-toolchain mingw-w64-x86_64-glfw
 
 #CXX = g++
-#CXX = clang++ -O3
+CXX = clang++ -O3
 
 EXE = TemuBuku
 MKDIR_P = mkdir -p
