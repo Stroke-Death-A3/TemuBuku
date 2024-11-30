@@ -20,11 +20,15 @@ private:
     RBTree& rbTree; // Reference to RBTree
     Node* root; // Root of the RBTree
 public:
-    Book(int _id, const std::string &_title, const std::string &_author, const std::string &_category,
-         const std::string &_subcategory, const std::string &_format, double _rating, double _reviews,
-         const std::string &_url, RBTree &_rbTree)
-        : id(_id), title(_title), author(_author), category(_category), subcategory(_subcategory),
-          format(_format), rating(_rating), reviews(_reviews), url(_url), rbTree(_rbTree), root(nullptr) {}
+    Book(int id, const std::string &title, const std::string &_author, 
+     const std::string &_category, const std::string &_subcategory, 
+     const std::string &_format, double rating, double reviews,
+     const std::string &_url, RBTree* _rbTree = nullptr)
+    : id(id), title(title), author(_author), category(_category), 
+      subcategory(_subcategory), format(_format), 
+      rating(rating), reviews(reviews), url(_url), 
+      rbTree(_rbTree ? *_rbTree : *(new RBTree())), 
+      root(nullptr) {}
 
     int getId() const { return id; }
     std::string getTitle() const { return title; }
@@ -46,6 +50,54 @@ public:
                   << "Rating: " << rating << "\n"
                   << "Reviews: " << reviews << "\n"
                   << "URL: " << url << "\n\n";
+    }
+
+    static Book fromString(const std::string& str) {
+
+        std::stringstream ss(str);
+
+        std::string item;
+
+        std::vector<std::string> parts;
+
+        
+
+        while (std::getline(ss, item, ',')) {
+
+            parts.push_back(item);
+
+        }
+
+        
+
+        if (parts.size() >= 9) {
+
+            return Book(
+
+                std::stoi(parts[0]),
+
+                parts[1],
+
+                parts[2],
+
+                parts[3],
+
+                parts[4],
+
+                parts[5],
+
+                std::stof(parts[6]),
+
+                std::stof(parts[7]),
+
+                parts[8]
+
+            );
+
+        }
+
+        return Book(0, "", "", "", "", "", 0.0f, 0.0f, "");
+
     }
 };
 

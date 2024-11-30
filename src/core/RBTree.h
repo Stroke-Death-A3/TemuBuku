@@ -3,6 +3,9 @@
 
 #include <string>
 #include <vector>
+#include <random>
+
+// Forward declaration
 
 enum Color { BLACK, RED, DOUBLE_BLACK };
 
@@ -10,30 +13,33 @@ class Node {
 public:
     std::string title;
     std::string author;
-    bool isFavorite;
     std::string data;
+    bool isFavorite;
+    Node* left;
+    Node* right;
+    Node* parent;
     int color;
-    Node *left, *right, *parent;
     explicit Node(std::string value);
 };
 
 class RBTree {
-public:
-    RBTree();
+private:
+    Node* root;
     std::vector<Node*> searchBST(Node* root, Node* key);
+
+public:
+    RBTree() : root(nullptr) {}
+    std::vector<Node*> searchValue(std::string& n);
+    void insertValue(std::string n);
     void addToFavorites(const std::string& bookIdentifier);
     void removeFromFavorites(const std::string& bookIdentifier);
-    void searchValue(std::string& n);
+    void searchValue(const std::string& value);
     void displayFavorites();
-    void insertValue(std::string);
     void deleteValue(std::string);
     void merge(RBTree);
     void inorder();
     void preorder();
     std::vector<Node*> favoriteList;
-
-private:
-    Node* root;
 
 protected:
     void rotateLeft(Node*&);

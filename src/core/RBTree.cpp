@@ -8,12 +8,6 @@ Node::Node(string data)
     color = RED;
     left = right = parent = nullptr;
 }
-
-RBTree::RBTree()
-{
-    root = nullptr;
-}
-
 int RBTree::getColor(Node *&node)
 {
     if (node == nullptr)
@@ -70,10 +64,10 @@ bool RBTree::areSimiliar(const std::string &str1, const std::string &str2)
 
 std::vector<Node *> RBTree::searchBST(Node *root, Node *ptr)
 {
-    std::vector<Node *> result;
+    std::vector<Node *> temp_result;
     if (root == nullptr)
     {
-        return result;
+        return temp_result;
     }
 
     // Convert search term to lowercase for comparison
@@ -89,60 +83,41 @@ std::vector<Node *> RBTree::searchBST(Node *root, Node *ptr)
     if (nodeData.find(searchTerm) != std::string::npos ||
         searchTerm.find(nodeData) != std::string::npos)
     {
-        result.push_back(root);
+        temp_result.push_back(root);
     }
 
     // Search both subtrees
     std::vector<Node *> left_result = searchBST(root->left, ptr);
     std::vector<Node *> right_result = searchBST(root->right, ptr);
 
-    // Combine results
-    result.insert(result.end(), left_result.begin(), left_result.end());
-    result.insert(result.end(), right_result.begin(), right_result.end());
+    // Combine temp_results
+    temp_result.insert(temp_result.end(), left_result.begin(), left_result.end());
+    temp_result.insert(temp_result.end(), right_result.begin(), right_result.end());
 
-    return result;
+    return temp_result;
 }
-void RBTree::searchValue(std::string &n)
-{
+
+std::vector<Node*> RBTree::searchValue(std::string& n) {
     // Check if the input string is "random"
-    if (n == "random")
-    {
-        // Generate a random number
+    if (n == "random") {
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_int_distribution<> distrib(1000, 9999); // Adjust range as needed
+        std::uniform_int_distribution<> distrib(1000, 9999);
         int randomNum = distrib(gen);
-
-        // Convert the random number to a string
         n = std::to_string(randomNum);
     }
 
     // Create a temporary Node for the search
-    Node *node = new Node(n);
+    Node* node = new Node(n);
 
     // Search the RBT for nodes containing the specified string
-    std::vector<Node *> result = searchBST(root, node);
+    std::vector<Node*> temp_result = searchBST(this->root, node);
 
     // Delete the temporary Node
     delete node;
 
-    // Print the search results
-    if (result.empty())
-    {
-        std::cout << "Tidak ada node yang mempunyai kemiripan " << n << std::endl;
-        return;
-    }
-    else
-    {
-        std::cout << "Menemukan Node yang mirip " << "'" << n << "'" << "\n";
-        for (Node *foundNode : result)
-        {
-            std::cout << foundNode->data << std::endl;
-        }
-        std::cout << "\nTotal matches found: " << result.size() << std::endl;
-    }
+    return temp_result;
 }
-
 void RBTree::insertValue(string n)
 {
     Node *node = new Node(n);
@@ -305,9 +280,9 @@ void RBTree::fixDeleteRBTree(Node *&node)
                     if (getColor(sibling->left) == BLACK && getColor(sibling->right) == BLACK)
                     {
                         setColor(sibling, RED);
-                        if (getColor(parent) == RED)
+                        if (parent != nullptr && getColor(parent) == RED)
                             setColor(parent, BLACK);
-                        else
+                        else if (parent != nullptr)
                             setColor(parent, DOUBLE_BLACK);
                         ptr = parent;
                     }
@@ -487,24 +462,24 @@ void RBTree::addToFavorites(const std::string &bookIdentifier)
     Node *node = new Node(bookIdentifier);
     Node *selectedBook = nullptr;
 
-    std::vector<Node *> searchResults = searchBST(root, node);
+    std::vector<Node *> searchtemp_results = searchBST(root, node);
     delete node;
     // If multiple matches, let user choose
-    if (searchResults.size() > 1)
+    if (searchtemp_results.size() > 1)
     {
         std::cout << "Multiple books found. Please select:" << std::endl;
-        for (int i = 1; i < searchResults.size(); i++)
+        for (int i = 1; i < searchtemp_results.size(); i++)
         {
-            std::cout << i << ". " << searchResults[i]->data << std::endl;
+            std::cout << i << ". " << searchtemp_results[i]->data << std::endl;
         }
 
         int choice;
         std::cout << "Enter the number of the book to add to favorites: ";
         std::cin >> choice;
 
-        if (choice > 0 && choice <= searchResults.size())
+        if (choice > 0 && choice <= searchtemp_results.size())
         {
-            selectedBook = searchResults[choice - 1];
+            selectedBook = searchtemp_results[choice - 1];
         }
         else
         {
@@ -512,9 +487,9 @@ void RBTree::addToFavorites(const std::string &bookIdentifier)
             return;
         }
     }
-    else if (searchResults.size() == 1)
+    else if (searchtemp_results.size() == 1)
     {
-        selectedBook = searchResults[0];
+        selectedBook = searchtemp_results[0];
     }
     else
     {

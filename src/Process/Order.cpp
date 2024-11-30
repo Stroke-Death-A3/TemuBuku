@@ -1,6 +1,5 @@
-#include <bits/stdc++.h>
-#include "../core/RBTree.h"
-#include "../core/File.h"          // Include the header file
+#include "../core/RBTree.cpp"
+#include "File.cpp"          // Include the header file
 #include "../core/Book.h"           // Include the header file
 #include <iostream>
 

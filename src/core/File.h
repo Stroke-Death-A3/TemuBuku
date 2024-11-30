@@ -14,12 +14,13 @@ private:
     std::ifstream file;
     RBTree& rbTree;  // Reference to RBTree object
     
-    std::vector<std::string> splitCSVLine(const std::string& line);
-    
+   
     template <typename T>
     T stringToType(const std::string& str);
 
-public:
+public: 
+
+    std::vector<std::string> splitCSVLine(const std::string& line);
     File(RBTree& tree) : rbTree(tree) {}  // Constructor taking RBTree reference
     void openFile(const std::string& path);
     void parseFile();
