@@ -127,7 +127,6 @@ std::vector<Node*> RBTree::searchValue(std::string& n) {
         };
         
         collectISBNs(root);
-        
         if (existingISBNs.empty()) {
             std::cout << "No books in database" << std::endl;
             return std::vector<Node*>();
@@ -143,6 +142,9 @@ std::vector<Node*> RBTree::searchValue(std::string& n) {
         
         // Get random ISBN
         n = existingISBNs[distrib(gen)];
+        if(n == "0"){
+            return std::vector<Node*>();
+        }
         std::cout << "Selected random ISBN: " << n << std::endl;
         
         // Search using ISBN

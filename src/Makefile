@@ -10,7 +10,7 @@
 #   pacman -S --noconfirm --needed mingw-w64-x86_64-toolchain mingw-w64-x86_64-glfw
 
 #CXX = g++
-#CXX = clang++
+CXX = clang++ -O3
 
 EXE = TemuBuku
 MKDIR_P = mkdir -p
@@ -41,7 +41,7 @@ LIBS =
 ifeq ($(UNAME_S), Linux) #LINUX
 	ECHO_MESSAGE = "Linux"
 	LIBS += $(LINUX_GL_LIBS) `pkg-config --static --libs glfw3`
-	CXXFLAGS += `pkg-config --cflags glfw3`
+	CXXFLAGS += `pkg-config --cflags glfw3` 
 	CFLAGS = $(CXXFLAGS)
 endif
 
