@@ -49,8 +49,8 @@ int main(int, char **)
     ImGuiIO &io = ImGui::GetIO();
 
     // Load custom font
-    ImFont* customFont = io.Fonts->AddFontFromFileTTF("../font/AntipastoPro-Bold_trial.ttf", 16.0f); // Regular size
-    ImFont* titleFont = io.Fonts->AddFontFromFileTTF("../font/Roboto-Regular.ttf", 16.0f);  // Larger for titles
+    ImFont* customFont = io.Fonts->AddFontFromFileTTF("../font/Play-Chickens.otf", 24.0f); // Regular size
+    ImFont* titleFont = io.Fonts->AddFontFromFileTTF("../font/Roboto-Regular.ttf", 24.0f);  // Larger for titles
 
     // Set default font
     io.FontDefault = titleFont;
@@ -58,6 +58,16 @@ int main(int, char **)
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
 
+    // Set border radius for input fields and buttons
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.FrameRounding = 5.0f; // Set border radius for input fields and buttons
+    style.GrabRounding = 5.0f;  // Set border radius for sliders, etc.
+
+    // Modify color for input fields and buttons
+    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);   // Dark gray (input fields)
+    style.Colors[ImGuiCol_Button] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);    // Dark gray (buttons)
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.3f, 0.3f, 0.3f, 1.0f); // Darker gray (button hover)
+    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.1f, 0.1f, 0.1f, 1.0f); // Darkest gray (button active)
     // Setup Platform/Renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
@@ -109,14 +119,18 @@ int main(int, char **)
         ImGui::SetNextWindowPos(ImVec2(0, 0));
         ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
         ImGui::Begin("TemuBuku", nullptr,
-                     ImGuiWindowFlags_NoTitleBar |
-                         ImGuiWindowFlags_NoResize |
-                         ImGuiWindowFlags_NoMove |
-                         ImGuiWindowFlags_NoCollapse);
+                    ImGuiWindowFlags_NoTitleBar |
+                        ImGuiWindowFlags_NoResize |
+                        ImGuiWindowFlags_NoMove |
+                        ImGuiWindowFlags_NoCollapse);
+
+        // Set background color and text color for the main window
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f)); // Dark gray background
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // White text
 
         // Use title font for header
         ImGui::PushFont(titleFont);
-        ImGui::Text("Book Search : ");
+        ImGui::Text("Search Book : ");
         ImGui::PopFont();
 
         ImGui::SameLine();
@@ -127,7 +141,7 @@ int main(int, char **)
 
         // Handle Enter key in input
         if (ImGui::InputTextWithHint("##search", "Enter book title...", searchTerm, IM_ARRAYSIZE(searchTerm),
-                                     ImGuiInputTextFlags_EnterReturnsTrue))
+                                    ImGuiInputTextFlags_EnterReturnsTrue))
         {
             searchTriggered = true;
         }
@@ -156,6 +170,9 @@ int main(int, char **)
             ImGui::PopFont();
             bool alternate = false;
 
+            // Set background color to dark gray when search is triggered
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f)); // Dark gray color
+
             // Main scrollable container
             ImGui::BeginChild("SearchResults", ImVec2(0, ImGui::GetWindowHeight() * 0.7f), true);
 
@@ -163,43 +180,53 @@ int main(int, char **)
             {
                 ImGui::PushID(result);
 
-                // Create child window for each row
+                // Set border radius for each row (using PushStyleVar directly)
+                ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);  // Set border radius
+                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));  // Add padding to make the selectable button larger
+
+                // Use the same background color for alternating rows
                 if (alternate)
                 {
-                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.220f, 0.419f, 0.553f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f)); // Darker gray for even rows
                 }
                 else
                 {
-                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f)); // Darker gray for odd rows
                 }
 
-                // Fixed height child window for each row
-                ImGui::BeginChild(("Row" + std::to_string(reinterpret_cast<intptr_t>(result))).c_str(),
-                                  ImVec2(0, 25.0f), true,
-                                  ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+                // Adjust row height dynamically based on font size
+                float rowHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemSpacing.y + 10;  // Include item spacing
 
-                // Selectable with same width as child window
-                if (ImGui::Selectable(result->data.c_str(), false,
-                                      ImGuiSelectableFlags_None,
-                                      ImVec2(0, 25.0f)))
+                // Create the Selectable button with dynamic height
+                if (ImGui::Selectable(result->data.c_str(), false, ImGuiSelectableFlags_None, ImVec2(0, rowHeight)))
                 {
                     showDetailsModal = true;
                 }
 
-                ImGui::EndChild();
+                // Pop style changes after rendering the row
                 ImGui::PopStyleColor();
+                ImGui::PopStyleVar(2);  // Pop both the border radius and padding changes
+
                 ImGui::PopID();
 
                 alternate = !alternate;
             }
 
+
+
             ImGui::EndChild(); // End main scrollable container
+
+            // Pop the color change for child background
+            ImGui::PopStyleColor();
         }
         else if (searchTriggered) // Only show "No results" if a search was performed
         {
             ImGui::SetCursorPosX((ImGui::GetWindowWidth() - ImGui::CalcTextSize("No results found.").x) * 0.5f);
             ImGui::Text("No results found.");
         }
+
+        // Restore default style settings after search results
+        ImGui::PopStyleColor(2); // Pop the text and window background color
 
         ImGui::End();
 
@@ -211,7 +238,7 @@ int main(int, char **)
         }
 
         if (ImGui::BeginPopupModal("Book Details", nullptr,
-                                   ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
+                                ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
         {
             ImGui::PushFont(customFont);
             ImGui::Text("Book Information");
@@ -247,6 +274,8 @@ int main(int, char **)
 
         glfwSwapBuffers(window);
     }
+
+
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
