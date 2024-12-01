@@ -162,7 +162,7 @@ void File::parseFile()
 
              std::string bookKey = std::to_string(book.getId()) + "|" + 
                                   book.getTitle() + "|" + 
-                                  book.getAuthor();
+                                  book.getAuthor()+ "|" + book.getCategory() + "|"  + "|" + book.getUrl();
             // Insert into your data structure
             rbTree.insertValue(bookKey);
         }
