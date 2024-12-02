@@ -314,19 +314,49 @@ int main(int, char **)
         {
             ImGui::OpenPopup("Book Details");
 
-            // Calculate required width based on title if we have a selected book
-            float popupWidth = 400.0f; // Default minimum width
+            // Calculate required width based on title and content
+            float minWidth = 400.0f;  // Minimum width
+            float maxWidth = ImGui::GetIO().DisplaySize.x * 0.8f;  // Maximum 80% of screen width
+            float popupWidth = minWidth;
+
             if (selectedBook != nullptr)
             {
                 std::string data = selectedBook->data;
-                size_t titleStart = data.find('|');
-                size_t titleEnd = data.find('|', titleStart + 1);
-                if (titleStart != std::string::npos && titleEnd != std::string::npos)
+                std::vector<std::string> bookData;
+                std::stringstream ss(data);
+                std::string item;
+
+                while (std::getline(ss, item, '|'))
                 {
-                    std::string title = data.substr(titleStart + 1, titleEnd - titleStart - 1);
-                    float titleWidth = ImGui::CalcTextSize(title.c_str()).x;
-                    // Add padding and ensure minimum width
-                    popupWidth = std::max(400.0f, titleWidth + 100.0f);
+                    item.erase(0, item.find_first_not_of(" \t"));
+                    item.erase(item.find_last_not_of(" \t") + 1);
+                    if (!item.empty())
+                    {
+                        bookData.push_back(item);
+                    }
+                }
+
+                if (!bookData.empty())
+                {
+                    // Calculate width needed for each field
+                    float titleWidth = ImGui::CalcTextSize(bookData[1].c_str()).x;
+                    float isbnWidth = ImGui::CalcTextSize(bookData[0].c_str()).x;
+                    float authorWidth = ImGui::CalcTextSize(bookData[2].c_str()).x;
+                    
+                    // Add padding for labels and copy buttons
+                    float labelWidth = 100.0f;  // Width reserved for labels
+                    float buttonWidth = 50.0f;  // Width for copy button
+                    float padding = 40.0f;      // Extra padding
+                    
+                    // Find the maximum width needed
+                    popupWidth = std::max({
+                        titleWidth,
+                        isbnWidth,
+                        authorWidth
+                    }) + labelWidth + buttonWidth + padding;
+                    
+                    // Clamp width between min and max
+                    popupWidth = std::min(std::max(popupWidth, minWidth), maxWidth);
                 }
             }
 
@@ -367,22 +397,47 @@ int main(int, char **)
                 // Display formatted book information
                 if (bookData.size() >= 8)
                 { // Ensure we have enough fields including image URLs
-                    // Display book info
-                    ImGui::Text("ISBN:");
-                    ImGui::SameLine(100);
-                    ImGui::TextWrapped("%s", bookData[0].c_str());
+                    // Function to create a copy button for text
+                    auto AddCopyButton = [](const char* label, const char* text) {
+                        ImGui::Text("%s:", label);
+                        ImGui::SameLine(100);
+                        ImGui::TextWrapped("%s", text);
+                        ImGui::SameLine();
+                        ImGui::PushID(label);
+                        if (ImGui::SmallButton("Copy"))
+                        {
+                            ImGui::SetClipboardText(text);
+                        }
+                        if (ImGui::IsItemHovered())
+                        {
+                            ImGui::SetTooltip("Copy to clipboard");
+                        }
+                        ImGui::PopID();
+                    };
+
+                    // Display book info with copy buttons
+                    AddCopyButton("ISBN", bookData[0].c_str());
+                    ImGui::Spacing();
+                    AddCopyButton("Title", bookData[1].c_str());
+                    ImGui::Spacing();
+                    AddCopyButton("Author", bookData[2].c_str());
+                    ImGui::Spacing();
+
+                    // Add copy all button
+                    if (ImGui::Button("Copy All Info"))
+                    {
+                        std::string allInfo = "ISBN: " + bookData[0] + "\n"
+                                            "Title: " + bookData[1] + "\n"
+                                            "Author: " + bookData[2];
+                        ImGui::SetClipboardText(allInfo.c_str());
+                    }
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip("Copy all information to clipboard");
+                    }
 
                     ImGui::Spacing();
-                    ImGui::Text("Title:");
-                    ImGui::SameLine(100);
-                    ImGui::TextWrapped("%s", bookData[1].c_str());
-
-                    ImGui::Spacing();
-                    ImGui::Text("Author:");
-                    ImGui::SameLine(100);
-                    ImGui::TextWrapped("%s", bookData[2].c_str());
-
-                    ImGui::Spacing();
+                    ImGui::Separator();
 
                     // Image handling
                     static std::unordered_map<std::string, TextureID> textureCache;
@@ -417,19 +472,29 @@ int main(int, char **)
                 }
                 else if (bookData.size() >= 3)
                 {
-                    ImGui::Text("ISBN:");
-                    ImGui::SameLine(100);
-                    ImGui::TextWrapped("%s", bookData[0].c_str());
+                    // Same copy button functionality for smaller dataset
+                    auto AddCopyButton = [](const char* label, const char* text) {
+                        ImGui::Text("%s:", label);
+                        ImGui::SameLine(100);
+                        ImGui::TextWrapped("%s", text);
+                        ImGui::SameLine();
+                        ImGui::PushID(label);
+                        if (ImGui::SmallButton("Copy"))
+                        {
+                            ImGui::SetClipboardText(text);
+                        }
+                        if (ImGui::IsItemHovered())
+                        {
+                            ImGui::SetTooltip("Copy to clipboard");
+                        }
+                        ImGui::PopID();
+                    };
 
+                    AddCopyButton("ISBN", bookData[0].c_str());
                     ImGui::Spacing();
-                    ImGui::Text("Title:");
-                    ImGui::SameLine(100);
-                    ImGui::TextWrapped("%s", bookData[1].c_str());
-
+                    AddCopyButton("Title", bookData[1].c_str());
                     ImGui::Spacing();
-                    ImGui::Text("Author:");
-                    ImGui::SameLine(100);
-                    ImGui::TextWrapped("%s", bookData[2].c_str());
+                    AddCopyButton("Author", bookData[2].c_str());
                 }
 
                 ImGui::Separator();
