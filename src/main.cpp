@@ -90,6 +90,9 @@ int main(int, char **)
 
 {
     static ImVec2 popupPos(0, 0);
+    // Add at the top with other state variables
+    static bool showNoResults = false;
+    static float noResultsTimer = 0.0f;
     // Initialize GLFW
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -320,10 +323,26 @@ int main(int, char **)
                 ImGui::PopStyleColor();
             }
         }
-        else if (searchTriggered) // Only show "No results" if a search was performed
+        // Replace the existing code
+        else if (searchTriggered) 
         {
-            ImGui::SetCursorPosX((ImGui::GetWindowWidth() - ImGui::CalcTextSize("No results found.").x) * 0.5f);
-            ImGui::Text("No results found.");
+            showNoResults = true;
+            noResultsTimer = 5.0f; // Show for 2 seconds
+        }
+
+        // Add this in your ImGui render loop
+        if (showNoResults)
+        {
+            if (noResultsTimer > 0.0f)
+            {
+                ImGui::SetCursorPosX((ImGui::GetWindowWidth() - ImGui::CalcTextSize("No results found.").x) * 0.5f);
+                ImGui::Text("No results found.");
+                noResultsTimer -= ImGui::GetIO().DeltaTime; // Decrease timer each frame
+            }
+            else
+            {
+                showNoResults = false;
+            }
         }
 
         // Restore default style settings after search results
