@@ -107,59 +107,58 @@ std::vector<Node *> RBTree::searchBST(Node *root, Node *ptr)
     return temp_result;
 }
 
+// Add helper function to count nodes
+int RBTree::countNodes(Node* node) {
+    if (node == nullptr) return 0;
+    return 1 + countNodes(node->left) + countNodes(node->right);
+}
+
+// Add helper function to get nth node
+Node* RBTree::getNthNode(Node* node, int& n) {
+    if (node == nullptr) return nullptr;
+    
+    Node* left = getNthNode(node->left, n);
+    if (left) return left;
+    
+    if (--n == 0) return node;
+    
+    return getNthNode(node->right, n);
+}
+
+// Modify searchValue function
 std::vector<Node*> RBTree::searchValue(std::string& n) {
     if (n == "random") {
-        // Collect only ISBNs
-        std::vector<std::string> existingISBNs;
-        std::function<void(Node*)> collectISBNs = [&](Node* node) {
-            if (node == nullptr) return;
-            
-            // Extract ISBN from node data (before first '|')
-            std::string nodeData = node->data;
-            size_t pos = nodeData.find('|');
-            if (pos != std::string::npos) {
-                std::string isbn = nodeData.substr(0, pos);
-                existingISBNs.push_back(isbn);
-            }
-            
-            collectISBNs(node->left);
-            collectISBNs(node->right);
-        };
-        
-        collectISBNs(root);
-        if (existingISBNs.empty()) {
+        // Get total number of nodes
+        int totalNodes = countNodes(root);
+        if (totalNodes == 0) {
             std::cout << "No books in database" << std::endl;
             return std::vector<Node*>();
         }
         
-        // Debug: Print available ISBNs count
-        std::cout << "Found " << existingISBNs.size() << " ISBNs" << std::endl;
-        
-        // Select random ISBN
+        // Generate random index
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_int_distribution<> distrib(0, existingISBNs.size() - 1);
+        std::uniform_int_distribution<> distrib(1, totalNodes);
+        int randomIndex = distrib(gen);
         
-        // Get random ISBN
-        n = existingISBNs[distrib(gen)];
-        if(n == "0"){
-            return std::vector<Node*>();
+        // Get random node
+        Node* randomNode = getNthNode(root, randomIndex);
+        if (randomNode) {
+            std::vector<Node*> result;
+            result.push_back(randomNode);
+            return result;
         }
-        std::cout << "Selected random ISBN: " << n << std::endl;
         
-        // Search using ISBN
-        Node* node = new Node(n);
-        std::vector<Node*> results = searchBST(root, node);
-        delete node;
-        
-        return results;
+        return std::vector<Node*>();
     }
+    
     // Non-random search remains unchanged
     Node* node = new Node(n);
     std::vector<Node*> results = searchBST(root, node);
     delete node;
     return results;
 }
+
 void RBTree::insertValue(string n)
 {
     Node *node = new Node(n);

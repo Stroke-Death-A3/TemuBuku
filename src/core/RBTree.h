@@ -51,6 +51,8 @@ protected:
     void preorderBST(Node*&);
     int getColor(Node*&);
     void setColor(Node*&, int);
+    int countNodes(Node*);
+    Node* getNthNode(Node*, int&n);
     Node* minValueNode(Node*&);
     Node* maxValueNode(Node*&);
     Node* insertBST(Node*&, Node*&);
