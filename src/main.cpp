@@ -239,83 +239,86 @@ int main(int, char **)
         ImGui::Separator();
         if (!searchResults.empty())
         {
+            // Check if this is a special feature
+            bool isSpecialFeature = false;
+
             if (searchResults[0]->data == "CALCULATOR")
             {
+                isSpecialFeature = true;
                 gimik.renderCalculator();
             }
             else if (searchResults[0]->data == "DICE")
             {
+                isSpecialFeature = true;
                 gimik.renderDiceRoller();
             }
-            else
+
+            // Only show regular search UI if not a special feature
+            if (!isSpecialFeature)
             {
-                // Regular search results display
+                ImGui::PushFont(titleFont);
                 ImGui::Text("Found %d matches:", searchResults.size());
                 ImGui::PopFont();
-                // ... rest of existing search results display code ...
-            }
-            ImGui::PushFont(titleFont);
-            ImGui::Text("Found %d matches:", searchResults.size());
-            ImGui::PopFont();
-            bool alternate = false;
+                bool alternate = false;
 
-            // Set background color to dark gray when search is triggered
-            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f)); // Dark gray color
+                // Set background color to dark gray when search is triggered
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f)); // Dark gray color
 
-            // Main scrollable container
-            ImGui::BeginChild("SearchResults", ImVec2(0, ImGui::GetWindowHeight() * 0.7f), true);
+                // Main scrollable container
+                ImGui::BeginChild("SearchResults", ImVec2(0, ImGui::GetWindowHeight() * 0.7f), true);
 
-            for (Node *result : searchResults)
-            {
-                ImGui::PushID(result);
-
-                // Extract title from full data string
-                std::string fullData = result->data;
-                std::string title;
-                size_t titleStart = fullData.find('|');
-                size_t titleEnd = fullData.find('|', titleStart + 1);
-                if (titleStart != std::string::npos && titleEnd != std::string::npos)
+                for (Node *result : searchResults)
                 {
-                    title = fullData.substr(titleStart + 1, titleEnd - titleStart - 1);
-                }
-                else
-                {
-                    title = fullData; // Fallback to full data if parsing fails
+                    ImGui::PushID(result);
+
+                    // Extract title from full data string
+                    std::string fullData = result->data;
+                    std::string title;
+                    size_t titleStart = fullData.find('|');
+                    size_t titleEnd = fullData.find('|', titleStart + 1);
+                    if (titleStart != std::string::npos && titleEnd != std::string::npos)
+                    {
+                        title = fullData.substr(titleStart + 1, titleEnd - titleStart - 1);
+                    }
+                    else
+                    {
+                        title = fullData; // Fallback to full data if parsing fails
+                    }
+
+                    // Style settings remain the same
+                    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);
+                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+
+                    if (alternate)
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+                    }
+                    else
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+                    }
+
+                    float rowHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemSpacing.y + 10;
+
+                    // Display only title in Selectable
+                    if (ImGui::Selectable(title.c_str(), false, ImGuiSelectableFlags_None, ImVec2(0, rowHeight)))
+                    {
+                        selectedBook = result;
+                        showDetailsModal = true;
+                        popupPos = ImGui::GetMousePos();
+                    }
+
+                    ImGui::PopStyleColor();
+                    ImGui::PopStyleVar(2);
+                    ImGui::PopID();
+                    alternate = !alternate;
                 }
 
-                // Style settings remain the same
-                ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);
-                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+                ImGui::EndChild(); // End main scrollable container
 
-                if (alternate)
-                {
-                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
-                }
-                else
-                {
-                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
-                }
-
-                float rowHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemSpacing.y + 10;
-
-                // Display only title in Selectable
-                if (ImGui::Selectable(title.c_str(), false, ImGuiSelectableFlags_None, ImVec2(0, rowHeight)))
-                {
-                    selectedBook = result;
-                    showDetailsModal = true;
-                    popupPos = ImGui::GetMousePos();
-                }
-
+                // Pop the color change for child background
                 ImGui::PopStyleColor();
-                ImGui::PopStyleVar(2);
-                ImGui::PopID();
-                alternate = !alternate;
             }
-
-            ImGui::EndChild(); // End main scrollable container
-
-            // Pop the color change for child background
-            ImGui::PopStyleColor();
         }
         else if (searchTriggered) // Only show "No results" if a search was performed
         {

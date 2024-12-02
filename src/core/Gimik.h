@@ -11,8 +11,8 @@ private:
     RBTree &rbtree;
 
     // Calculator state
-    float num1 = 0.0f;
-    float num2 = 0.0f;
+    std::vector<float> numbers;
+    std::string expression;
     float result = 0.0f;
     char operation = '+';
 

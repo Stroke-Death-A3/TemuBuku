@@ -4,15 +4,7 @@
 
 Gimik::Gimik(RBTree& tree) : rbtree(tree), rng(std::random_device{}()) {}
 
-float Gimik::calculate() {
-    switch(operation) {
-        case '+': return num1 + num2;
-        case '-': return num1 - num2;
-        case '*': return num1 * num2;
-        case '/': return num2 != 0 ? num1 / num2 : 0;
-        default: return 0;
-    }
-}
+
 
 int Gimik::rollDice() {
     std::uniform_int_distribution<> dist(1, 6);
@@ -23,37 +15,47 @@ void Gimik::renderCalculator() {
     ImGui::Text("Calculator");
     ImGui::Separator();
     
-    ImGui::InputFloat("Number 1", &num1);
-    ImGui::InputFloat("Number 2", &num2);
-    
-    ImGui::Text("Operation:");
-    ImGui::SameLine();
-
-    if (ImGui::Button("+")) operation = '+';
-    ImGui::SameLine();
-    if (ImGui::Button("-")) operation = '-';
-    ImGui::SameLine();
-    if (ImGui::Button("*")) operation = '*';
-    ImGui::SameLine();
-    if (ImGui::Button("/")) operation = '/';
+    // Dynamic number inputs
+    static char expr[256] = "";
+    ImGui::InputText("Expression", expr, sizeof(expr));
     
     if (ImGui::Button("Calculate")) {
-        // Format input for searchValue
-        std::string calcStr = "calc:" + 
-                             std::to_string(num1) + ":" + 
-                             operation + ":" + 
-                             std::to_string(num2);
+        expression = expr;
+        std::stringstream ss(expression);
+        float num;
+        char op;
         
-        // Use searchValue
-        std::vector<Node*> results = rbtree.searchValue(calcStr);
+        // Parse first number
+        ss >> num;
+        result = num;
         
-        // Display result if available
-        if (!results.empty()) {
-            result = std::stof(results[0]->data);
+        // Parse operations and numbers
+        while (ss >> op >> num) {
+            switch(op) {
+                case '+': result += num; break;
+                case '-': result -= num; break;
+                case '*': result *= num; break;
+                case '/': result = (num != 0) ? result / num : 0; break;
+            }
         }
     }
     
     ImGui::Text("Result: %.2f", result);
+    
+    // Quick operation buttons
+    ImGui::Text("Quick Operations:");
+    if (ImGui::Button("+")) strcat(expr, " + ");
+    ImGui::SameLine();
+    if (ImGui::Button("-")) strcat(expr, " - ");
+    ImGui::SameLine();
+    if (ImGui::Button("*")) strcat(expr, " * ");
+    ImGui::SameLine();
+    if (ImGui::Button("/")) strcat(expr, " / ");
+    ImGui::SameLine();
+    if (ImGui::Button("C")) {
+        expr[0] = '\0';
+        result = 0;
+    }
 }
 
 void Gimik::renderDiceRoller() {
@@ -108,9 +110,7 @@ void Gimik::renderRandomBook() {
 }
 
 void Gimik::render() {
-    if (ImGui::Button("Fun Features")) {
-        ImGui::OpenPopup("Gimik Features");
-    }
+  
     
     if (ImGui::BeginPopupModal("Gimik Features", nullptr, 
         ImGuiWindowFlags_AlwaysAutoResize)) {
