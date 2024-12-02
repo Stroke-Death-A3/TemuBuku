@@ -232,50 +232,74 @@ int main(int, char **)
                 ImGui::Text("Found %d matches:", searchResults.size());
                 ImGui::PopFont();
 
-                // Main scrollable container
+                // Constants for pagination
+                const int ITEMS_PER_PAGE = 100;
+                static int currentPage = 0;
+                int totalPages = (searchResults.size() + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
+
+                // Pagination controls
+                if (ImGui::Button("<<")) currentPage = 0;
+                ImGui::SameLine();
+                if (ImGui::Button("<") && currentPage > 0) currentPage--;
+                ImGui::SameLine();
+                ImGui::Text("Page %d/%d", currentPage + 1, totalPages);
+                ImGui::SameLine();
+                if (ImGui::Button(">") && currentPage < totalPages - 1) currentPage++;
+                ImGui::SameLine();
+                if (ImGui::Button(">>")) currentPage = totalPages - 1;
+
+                // Main scrollable container with clipper
                 ImGui::BeginChild("SearchResults", ImVec2(0, ImGui::GetWindowHeight() * 0.7f), true);
-
-                for (int i = 0; i < searchResults.size(); i++)
+                ImGuiListClipper clipper;
+                
+                int startIdx = currentPage * ITEMS_PER_PAGE;
+                int endIdx = std::min(startIdx + ITEMS_PER_PAGE, (int)searchResults.size());
+                
+                clipper.Begin(endIdx - startIdx);
+                while (clipper.Step())
                 {
-                    Node* result = searchResults[i];
-                    ImGui::PushID(result);
-
-                    // Extract title from full data string
-                    std::string fullData = result->data;
-                    std::string title;
-                    size_t titleStart = fullData.find('|');
-                    size_t titleEnd = fullData.find('|', titleStart + 1);
-                    if (titleStart != std::string::npos && titleEnd != std::string::npos)
+                    for (int i = clipper.DisplayStart + startIdx; i < clipper.DisplayEnd + startIdx && i < endIdx; i++)
                     {
-                        title = fullData.substr(titleStart + 1, titleEnd - titleStart - 1);
-                    }
-                    else
-                    {
-                        title = fullData;
-                    }
+                        Node* result = searchResults[i];
+                        ImGui::PushID(result);
 
-                    // Set background color for alternating rows
-                    ImGui::PushStyleColor(ImGuiCol_Button, (i % 2 == 0) ? 
-                        ImVec4(0.2f, 0.2f, 0.2f, 1.0f) : 
-                        ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
-                    
-                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+                        // Extract title from full data string
+                        std::string fullData = result->data;
+                        std::string title;
+                        size_t titleStart = fullData.find('|');
+                        size_t titleEnd = fullData.find('|', titleStart + 1);
+                        if (titleStart != std::string::npos && titleEnd != std::string::npos)
+                        {
+                            title = fullData.substr(titleStart + 1, titleEnd - titleStart - 1);
+                        }
+                        else
+                        {
+                            title = fullData;
+                        }
 
-                    // Calculate row height and full width
-                    float rowHeight = ImGui::GetTextLineHeight() + 20.0f;
-                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-                    
-                    // Create full-width button with text aligned left
-                    if (ImGui::Button(title.c_str(), ImVec2(-FLT_MIN, rowHeight)))
-                    {
-                        selectedBook = result;
-                        showDetailsModal = true;
-                        popupPos = ImGui::GetMousePos();
+                        // Set background color for alternating rows
+                        ImGui::PushStyleColor(ImGuiCol_Button, (i % 2 == 0) ? 
+                            ImVec4(0.2f, 0.2f, 0.2f, 1.0f) : 
+                            ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+                        
+                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+
+                        // Calculate row height and full width
+                        float rowHeight = ImGui::GetTextLineHeight() + 20.0f;
+                        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+                        
+                        // Create full-width button with text aligned left
+                        if (ImGui::Button(title.c_str(), ImVec2(-FLT_MIN, rowHeight)))
+                        {
+                            selectedBook = result;
+                            showDetailsModal = true;
+                            popupPos = ImGui::GetMousePos();
+                        }
+
+                        ImGui::PopStyleVar();
+                        ImGui::PopStyleColor(2);
+                        ImGui::PopID();
                     }
-
-                    ImGui::PopStyleVar();
-                    ImGui::PopStyleColor(2);
-                    ImGui::PopID();
                 }
 
                 ImGui::EndChild();
