@@ -14,6 +14,7 @@
 #include "./Process/File.cpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+#include "./Process/Gimik.cpp"
 
 using TextureID = unsigned long long;
 
@@ -159,6 +160,8 @@ int main(int, char **)
         std::cerr << "Error loading books: " << e.what() << std::endl;
         return 1;
     }
+
+    Gimik gimik(rbtree1);
 
     // Search variables
 
@@ -307,6 +310,8 @@ int main(int, char **)
 
         // Restore default style settings after search results
         ImGui::PopStyleColor(2); // Pop the text and window background color
+
+        gimik.render();
 
         ImGui::End();
 
