@@ -239,6 +239,21 @@ int main(int, char **)
         ImGui::Separator();
         if (!searchResults.empty())
         {
+            if (searchResults[0]->data == "CALCULATOR")
+            {
+                gimik.renderCalculator();
+            }
+            else if (searchResults[0]->data == "DICE")
+            {
+                gimik.renderDiceRoller();
+            }
+            else
+            {
+                // Regular search results display
+                ImGui::Text("Found %d matches:", searchResults.size());
+                ImGui::PopFont();
+                // ... rest of existing search results display code ...
+            }
             ImGui::PushFont(titleFont);
             ImGui::Text("Found %d matches:", searchResults.size());
             ImGui::PopFont();

@@ -127,32 +127,41 @@ Node* RBTree::getNthNode(Node* node, int& n) {
 
 // Modify searchValue function
 std::vector<Node*> RBTree::searchValue(std::string& n) {
-    if (n == "random") {
-        // Get total number of nodes
+    // Check for special commands
+    if (n == "calculator" || n == "Calculator") {
+        // Create a dummy node to display calculator
+        Node* calcNode = new Node("CALCULATOR");
+        std::vector<Node*> result;
+        result.push_back(calcNode);
+        return result;
+    } else if (n == "dice" || n == "Dice") {
+        // Create a dummy node for dice roller
+        Node* diceNode = new Node("DICE");
+        std::vector<Node*> result;
+        result.push_back(diceNode);
+        return result;
+    } else if (n == "random") {
+        // Existing random book logic
         int totalNodes = countNodes(root);
         if (totalNodes == 0) {
-            std::cout << "No books in database" << std::endl;
             return std::vector<Node*>();
         }
         
-        // Generate random index
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> distrib(1, totalNodes);
         int randomIndex = distrib(gen);
         
-        // Get random node
         Node* randomNode = getNthNode(root, randomIndex);
         if (randomNode) {
             std::vector<Node*> result;
             result.push_back(randomNode);
             return result;
         }
-        
         return std::vector<Node*>();
     }
     
-    // Non-random search remains unchanged
+    // Regular search logic
     Node* node = new Node(n);
     std::vector<Node*> results = searchBST(root, node);
     delete node;
