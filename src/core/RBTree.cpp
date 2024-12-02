@@ -72,48 +72,34 @@ bool RBTree::areSimiliar(const std::string &str1, const std::string &str2)
 
     return base1 == base2;
 }
+
 std::vector<Node *> RBTree::searchBST(Node *root, Node *ptr) 
 {
     std::vector<Node *> temp_result;
-    if (root == nullptr) {
-        return temp_result;
-    }
+    if (!root) return temp_result;
 
-    // Get search term
-    std::string searchTerm = ptr->data;
-    std::transform(searchTerm.begin(), searchTerm.end(), searchTerm.begin(), ::tolower);
+    // Cache the lowercase search term
+    static std::string searchTermLower;
+    searchTermLower = ptr->data;
+    std::transform(searchTermLower.begin(), searchTermLower.end(), searchTermLower.begin(), ::tolower);
 
-    // Get node data
+    // Process current node
     std::string nodeData = root->data;
     std::transform(nodeData.begin(), nodeData.end(), nodeData.begin(), ::tolower);
-
-    // Split node data into fields
-    std::vector<std::string> fields;
-    std::stringstream ss(nodeData);
-    std::string field;
-    while (getline(ss, field, '|')) {
-        fields.push_back(field);
-    }
-
-    // Search in all fields (ISBN, title, author, publisher)
-    bool found = false;
-    for (const auto& field : fields) {
-        if (field.find(searchTerm) != std::string::npos) {
-            found = true;
-            break;
-        }
-    }
-
-    if (found) {
+    
+    // Use string_view for more efficient string operations
+    std::string_view nodeView(nodeData);
+    if (nodeView.find(searchTermLower) != std::string_view::npos) {
         temp_result.push_back(root);
     }
 
-    // Search both subtrees
-    std::vector<Node *> left_result = searchBST(root->left, ptr);
-    std::vector<Node *> right_result = searchBST(root->right, ptr);
-
-    temp_result.insert(temp_result.end(), left_result.begin(), left_result.end());
-    temp_result.insert(temp_result.end(), right_result.begin(), right_result.end());
+    // Search subtrees and combine results
+    auto leftResults = searchBST(root->left, ptr);
+    auto rightResults = searchBST(root->right, ptr);
+    
+    temp_result.reserve(temp_result.size() + leftResults.size() + rightResults.size());
+    temp_result.insert(temp_result.end(), leftResults.begin(), leftResults.end());
+    temp_result.insert(temp_result.end(), rightResults.begin(), rightResults.end());
 
     return temp_result;
 }
@@ -519,78 +505,54 @@ int RBTree::getBlackHeight(Node *node)
 // Method to add a book to favorites
 void RBTree::addToFavorites(const std::string &bookIdentifier)
 {
-    // Search for the book in the tree
-
-    Node *node = new Node(bookIdentifier, false);
-    Node *selectedBook = nullptr;
-
-    std::vector<Node *> searchtemp_results = searchBST(root, node);
-    delete node;
-    // If multiple matches, let user choose
-    if (searchtemp_results.size() > 1)
-    {
-        std::cout << "Multiple books found. Please select:" << std::endl;
-        for (int i = 1; i < searchtemp_results.size(); i++)
-        {
-            std::cout << i << ". " << searchtemp_results[i]->data << std::endl;
-        }
-
-        int choice;
-        std::cout << "Enter the number of the book to add to favorites: ";
-        std::cin >> choice;
-
-        if (choice > 0 && choice <= searchtemp_results.size())
-        {
-            selectedBook = searchtemp_results[choice - 1];
-        }
-        else
-        {
-            std::cout << "Invalid choice." << std::endl;
-            return;
-        }
-    }
-    else if (searchtemp_results.size() == 1)
-    {
-        selectedBook = searchtemp_results[0];
-    }
-    else
-    {
-        std::cout << "No book found with the given identifier." << std::endl;
+    Node searchNode(bookIdentifier, false);
+    auto results = searchBST(root, &searchNode);
+    
+    if (results.empty()) {
+        std::cout << "No book found with the given identifier.\n";
         return;
     }
 
-    // Add the selected book to favorites
-    if (selectedBook)
-    {
-        auto it = std::find(favoriteList.begin(), favoriteList.end(), selectedBook);
-        if (it == favoriteList.end())
-        {
-            selectedBook->isFavorite = true;
-            favoriteList.push_back(selectedBook);
-            std::cout << "Added to favorites: " << selectedBook->title << std::endl;
+    Node *selectedBook = results[0];
+    if (results.size() > 1) {
+        std::cout << "Multiple matches found. Select book:\n";
+        for (size_t i = 0; i < results.size(); ++i) {
+            std::cout << i + 1 << ". " << results[i]->data << '\n';
         }
-        else
-        {
-            std::cout << "Book is already in favorites." << std::endl;
+
+        size_t choice;
+        std::cout << "Enter choice (1-" << results.size() << "): ";
+        std::cin >> choice;
+        
+        if (choice < 1 || choice > results.size()) {
+            std::cout << "Invalid choice.\n";
+            return;
         }
+        selectedBook = results[choice - 1];
+    }
+
+    if (!selectedBook->isFavorite) {
+        selectedBook->isFavorite = true;
+        favoriteList.push_back(selectedBook);
+        std::cout << "Added to favorites: " << selectedBook->data << '\n';
+    } else {
+        std::cout << "Already in favorites.\n";
     }
 }
 
-// Method to remove a book from favorites
 void RBTree::removeFromFavorites(const std::string &bookIdentifier)
 {
     auto it = std::find_if(favoriteList.begin(), favoriteList.end(),
-                           [&bookIdentifier](Node *book)
-                           { return book->data.find(bookIdentifier) != std::string::npos; });
-    if (it != favoriteList.end())
-    {
+        [&bookIdentifier](const Node* book) {
+            return book->data.find(bookIdentifier) != std::string::npos;
+        });
+        
+    if (it != favoriteList.end()) {
         (*it)->isFavorite = false;
         favoriteList.erase(it);
-        std::cout << "Removed from favorites: " << (*it)->data << std::endl;
-    }
-    else
-    {
-        std::cout << "Book not found in favorites." << std::endl;
+        std::cout << "Removed from favorites\n";
+    } else {
+        std::cout << "Not found in favorites\n";
     }
 }
 
@@ -720,4 +682,17 @@ void RBTree::merge(RBTree rbTree2)
         root = root1;
     }
     return;
+}
+
+// Destructor to handle memory cleanup
+RBTree::~RBTree() {
+    deleteTree(root);
+}
+
+void RBTree::deleteTree(Node* node) {
+    if (node) {
+        deleteTree(node->left);
+        deleteTree(node->right);
+        delete node;
+    }
 }

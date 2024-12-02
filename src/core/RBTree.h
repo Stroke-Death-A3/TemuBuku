@@ -34,9 +34,11 @@ class RBTree {
 private:
     Node* root;
     std::vector<Node*> searchBST(Node* root, Node* key);
+    void deleteTree(Node* node);
 
 public:
     RBTree() : root(nullptr) {}
+    ~RBTree(); // Add destructor declaration
     std::vector<Node*> searchValue(std::string& n);
     void insertValue(std::string n);
     void addToFavorites(const std::string& bookIdentifier);
