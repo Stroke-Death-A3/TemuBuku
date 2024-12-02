@@ -251,38 +251,46 @@ int main(int, char **)
             {
                 ImGui::PushID(result);
 
-                // Set border radius for each row (using PushStyleVar directly)
-                ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);         // Set border radius
-                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10)); // Add padding to make the selectable button larger
-
-                // Use the same background color for alternating rows
-                if (alternate)
+                // Extract title from full data string
+                std::string fullData = result->data;
+                std::string title;
+                size_t titleStart = fullData.find('|');
+                size_t titleEnd = fullData.find('|', titleStart + 1);
+                if (titleStart != std::string::npos && titleEnd != std::string::npos)
                 {
-                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f)); // Darker gray for even rows
+                    title = fullData.substr(titleStart + 1, titleEnd - titleStart - 1);
                 }
                 else
                 {
-                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f)); // Darker gray for odd rows
+                    title = fullData; // Fallback to full data if parsing fails
                 }
 
-                // Adjust row height dynamically based on font size
-                float rowHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemSpacing.y + 10; // Include item spacing
+                // Style settings remain the same
+                ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);
+                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
 
-                // Create the Selectable button with dynamic height
-
-                if (ImGui::Selectable(result->data.c_str(), false, ImGuiSelectableFlags_None, ImVec2(0, rowHeight)))
+                if (alternate)
                 {
-                    selectedBook = result; // Store selected book
-                    showDetailsModal = true;
-                    popupPos = ImGui::GetMousePos(); // Store cursor position
+                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+                }
+                else
+                {
+                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
                 }
 
-                // Pop style changes after rendering the row
+                float rowHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemSpacing.y + 10;
+
+                // Display only title in Selectable
+                if (ImGui::Selectable(title.c_str(), false, ImGuiSelectableFlags_None, ImVec2(0, rowHeight)))
+                {
+                    selectedBook = result;
+                    showDetailsModal = true;
+                    popupPos = ImGui::GetMousePos();
+                }
+
                 ImGui::PopStyleColor();
-                ImGui::PopStyleVar(2); // Pop both the border radius and padding changes
-
+                ImGui::PopStyleVar(2);
                 ImGui::PopID();
-
                 alternate = !alternate;
             }
 
@@ -306,7 +314,7 @@ int main(int, char **)
         if (showDetailsModal)
         {
             ImGui::OpenPopup("Book Details");
-            
+
             // Calculate required width based on title if we have a selected book
             float popupWidth = 400.0f; // Default minimum width
             if (selectedBook != nullptr)
@@ -322,7 +330,7 @@ int main(int, char **)
                     popupWidth = std::max(400.0f, titleWidth + 100.0f);
                 }
             }
-            
+
             // Set popup position and size
             ImGui::SetNextWindowPos(popupPos);
             ImGui::SetNextWindowSize(ImVec2(popupWidth, 0), ImGuiCond_Always);
@@ -330,8 +338,8 @@ int main(int, char **)
         }
 
         // Update BeginPopupModal flags to allow sizing
-        if (ImGui::BeginPopupModal("Book Details", nullptr, 
-            ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove))
+        if (ImGui::BeginPopupModal("Book Details", nullptr,
+                                   ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove))
         {
             ImGui::PushFont(customFont);
             ImGui::Text("Book Information");
