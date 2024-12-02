@@ -2,12 +2,23 @@
 #include "RBTree.h"
 using namespace std;
 
-Node::Node(string data)
+// Remove duplicate constructor implementation
+Node::Node(string value, bool isGimmick)
 {
-    this->data = data;
+    this->data = value;
+    this->isGimmick = isGimmick;
     color = RED;
     left = right = parent = nullptr;
+    
+    if (isGimmick) {
+        if (value == "CALCULATOR" || value == "calculator") {
+            gimmickType = "CALCULATOR";
+        } else if (value == "DICE" || value == "dice") {
+            gimmickType = "DICE";
+        }
+    }
 }
+
 int RBTree::getColor(Node *&node)
 {
     if (node == nullptr)
@@ -127,18 +138,14 @@ Node* RBTree::getNthNode(Node* node, int& n) {
 
 // Modify searchValue function
 std::vector<Node*> RBTree::searchValue(std::string& n) {
+    std::vector<Node*> result;
+    
     // Check for special commands
     if (n == "calculator" || n == "Calculator") {
-        // Create a dummy node to display calculator
-        Node* calcNode = new Node("CALCULATOR");
-        std::vector<Node*> result;
-        result.push_back(calcNode);
+        result.push_back(new Node("CALCULATOR", true));
         return result;
     } else if (n == "dice" || n == "Dice") {
-        // Create a dummy node for dice roller
-        Node* diceNode = new Node("DICE");
-        std::vector<Node*> result;
-        result.push_back(diceNode);
+        result.push_back(new Node("DICE", true));
         return result;
     } else if (n == "random") {
         // Existing random book logic
@@ -161,16 +168,21 @@ std::vector<Node*> RBTree::searchValue(std::string& n) {
         return std::vector<Node*>();
     }
     
-    // Regular search logic
-    Node* node = new Node(n);
+
+    Node* node = new Node(n, false);
     std::vector<Node*> results = searchBST(root, node);
     delete node;
     return results;
 }
 
+// Add helper method to check for gimmick nodes
+bool RBTree::isGimmickNode(Node* node) {
+    return node && node->isGimmick;
+}
+
 void RBTree::insertValue(string n)
 {
-    Node *node = new Node(n);
+    Node *node = new Node(n, false);
     root = insertBST(root, node);
     fixInsertRBTree(node);
 }
@@ -509,7 +521,7 @@ void RBTree::addToFavorites(const std::string &bookIdentifier)
 {
     // Search for the book in the tree
 
-    Node *node = new Node(bookIdentifier);
+    Node *node = new Node(bookIdentifier, false);
     Node *selectedBook = nullptr;
 
     std::vector<Node *> searchtemp_results = searchBST(root, node);

@@ -15,11 +15,19 @@ public:
     std::string author;
     std::string data;
     bool isFavorite;
+    bool isGimmick;
+    std::string gimmickType;
     Node* left;
     Node* right;
     Node* parent;
     int color;
     explicit Node(std::string value);
+    
+    // Replace both constructors with single declaration
+    Node(std::string value, bool isGimmick = false);
+    
+    bool isCalculator() const { return gimmickType == "CALCULATOR"; }
+    bool isDice() const { return gimmickType == "DICE"; }
 };
 
 class RBTree {
@@ -39,6 +47,7 @@ public:
     void merge(RBTree);
     void inorder();
     void preorder();
+    bool isGimmickNode(Node* node);
     std::vector<Node*> favoriteList;
 
 protected:
