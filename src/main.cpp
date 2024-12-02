@@ -1,7 +1,9 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include <stdio.h>
+#include <stdio.h>// Load before GLFW
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
 #include <GLFW/glfw3.h>
 #include <string>
 #include <vector>
@@ -9,14 +11,15 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <unordered_map>
 #include "./core/Book.h"
 #include "./core/RBTree.cpp"
 #include "./Process/File.cpp"
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include "stb_image.h"
 #include "./Process/Gimik.cpp"
 
-using TextureID = unsigned long long;
+using TextureID = GLuint;
 
 static void glfw_error_callback(int error, const char *description)
 {
@@ -26,64 +29,30 @@ static void glfw_error_callback(int error, const char *description)
 // First, add debug logging to LoadTextureFromURL
 TextureID LoadTextureFromURL(const char *url)
 {
-    std::cout << "\n=== Attempting to load image ===" << std::endl;
-    std::cout << "URL: " << url << std::endl;
-
-    // Debug: Check if URL is accessible
-    FILE *file = fopen(url, "rb");
-    if (!file)
-    {
-        std::cerr << "Error: Cannot access URL/file: " << url << std::endl;
-        std::cerr << "Error details: " << strerror(errno) << std::endl;
-        return 0;
-    }
-    fclose(file);
-
-    // Load image
     int width, height, channels;
-    unsigned char *image = stbi_load(url, &width, &height, &channels, STBI_rgb_alpha);
-
-    if (!image)
-    {
-        std::cerr << "stbi_load failed:" << std::endl;
-        std::cerr << "  Reason: " << stbi_failure_reason() << std::endl;
+    unsigned char* image = stbi_load(url, &width, &height, &channels, 4); // Force RGBA
+    
+    if (!image) {
+        std::cerr << "Failed to load image: " << url << std::endl;
+        std::cerr << "STB Reason: " << stbi_failure_reason() << std::endl;
         return 0;
     }
 
-    std::cout << "Image loaded successfully:" << std::endl;
-    std::cout << "  Dimensions: " << width << "x" << height << std::endl;
-    std::cout << "  Channels: " << channels << std::endl;
-
-    // Create OpenGL texture
     GLuint textureID;
     glGenTextures(1, &textureID);
-
-    if (textureID == 0)
-    {
-        std::cerr << "Failed to generate OpenGL texture" << std::endl;
-        stbi_image_free(image);
-        return 0;
-    }
-
-    std::cout << "Created OpenGL texture ID: " << textureID << std::endl;
-
     glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-
+    
     // Set texture parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
+    
+    // Upload texture data
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    
     stbi_image_free(image);
-
-    std::cout << "Texture loaded successfully" << std::endl;
-    std::cout << "==============================\n"
-              << std::endl;
-
-    // Cast to TextureID for return
-    return static_cast<TextureID>(textureID);
+    return textureID;
 }
 
 int main(int, char **)
@@ -262,16 +231,13 @@ int main(int, char **)
                 ImGui::PushFont(titleFont);
                 ImGui::Text("Found %d matches:", searchResults.size());
                 ImGui::PopFont();
-                bool alternate = false;
-
-                // Set background color to dark gray when search is triggered
-                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f)); // Dark gray color
 
                 // Main scrollable container
                 ImGui::BeginChild("SearchResults", ImVec2(0, ImGui::GetWindowHeight() * 0.7f), true);
 
-                for (Node *result : searchResults)
+                for (int i = 0; i < searchResults.size(); i++)
                 {
+                    Node* result = searchResults[i];
                     ImGui::PushID(result);
 
                     // Extract title from full data string
@@ -285,45 +251,36 @@ int main(int, char **)
                     }
                     else
                     {
-                        title = fullData; // Fallback to full data if parsing fails
+                        title = fullData;
                     }
 
-                    // Style settings remain the same
-                    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);
+                    // Set background color for alternating rows
+                    ImGui::PushStyleColor(ImGuiCol_Button, (i % 2 == 0) ? 
+                        ImVec4(0.2f, 0.2f, 0.2f, 1.0f) : 
+                        ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+                    
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+
+                    // Calculate row height and full width
+                    float rowHeight = ImGui::GetTextLineHeight() + 20.0f;
                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-
-                    if (alternate)
-                    {
-                        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
-                    }
-                    else
-                    {
-                        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
-                    }
-
-                    float rowHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemSpacing.y + 10;
-
-                    // Display only title in Selectable
-                    if (ImGui::Selectable(title.c_str(), false, ImGuiSelectableFlags_None, ImVec2(0, rowHeight)))
+                    
+                    // Create full-width button with text aligned left
+                    if (ImGui::Button(title.c_str(), ImVec2(-FLT_MIN, rowHeight)))
                     {
                         selectedBook = result;
                         showDetailsModal = true;
                         popupPos = ImGui::GetMousePos();
                     }
 
-                    ImGui::PopStyleColor();
-                    ImGui::PopStyleVar(2);
+                    ImGui::PopStyleVar();
+                    ImGui::PopStyleColor(2);
                     ImGui::PopID();
-                    alternate = !alternate;
                 }
 
-                ImGui::EndChild(); // End main scrollable container
-
-                // Pop the color change for child background
-                ImGui::PopStyleColor();
+                ImGui::EndChild();
             }
         }
-        // Replace the existing code
         else if (searchTriggered) 
         {
             showNoResults = true;
@@ -427,46 +384,35 @@ int main(int, char **)
 
                     ImGui::Spacing();
 
-                    // Image handling with proper type casting
-                    static TextureID bookCoverTexture = 0;
-                    static std::string lastImageUrl;
-
-                    // Get medium size image URL (index 6 contains MZZZZZZZ version)
+                    // Image handling
+                    static std::unordered_map<std::string, TextureID> textureCache;
                     std::string imageUrl = bookData[6];
                     imageUrl.erase(remove(imageUrl.begin(), imageUrl.end(), '"'), imageUrl.end());
 
-                    if (lastImageUrl != imageUrl)
-                    {
-                        // Clear previous texture
-                        if (bookCoverTexture)
-                        {
-                            GLuint texID = static_cast<GLuint>(bookCoverTexture);
-                            glDeleteTextures(1, &texID);
-                            bookCoverTexture = 0;
-                        }
-
-                        // Load new texture
-                        TextureID newTexture = LoadTextureFromURL(imageUrl.c_str());
-                        if (newTexture)
-                        {
-                            bookCoverTexture = newTexture;
-                            lastImageUrl = imageUrl;
-                            std::cout << "Successfully loaded texture ID: " << newTexture << std::endl;
+                    // Try to load texture if not in cache
+                    if (textureCache.find(imageUrl) == textureCache.end()) {
+                        TextureID tex = LoadTextureFromURL(imageUrl.c_str());
+                        if (tex) {
+                            // If there was an old texture, delete it
+                            if (textureCache[imageUrl]) {
+                                glDeleteTextures(1, &textureCache[imageUrl]);
+                            }
+                            textureCache[imageUrl] = tex;
                         }
                     }
 
-                    if (bookCoverTexture)
-                    {
-                        float windowWidth = ImGui::GetWindowWidth();
-                        float imageWidth = 200;
-                        float centeredX = (windowWidth - imageWidth) * 0.5f;
-                        ImGui::SetCursorPosX(centeredX);
-                        ImGui::Image(reinterpret_cast<ImTextureID>(bookCoverTexture), ImVec2(200, 300));
-                    }
-                    else
-                    {
-                        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
-                                           "Failed to load image from URL: %s", imageUrl.c_str());
+                    // Display the image
+                    if (textureCache[imageUrl]) {
+                        // Calculate aspect ratio for proper display
+                        float aspectRatio = 0.75f; // Default book cover ratio (3:4)
+                        float displayHeight = 300.0f;
+                        float displayWidth = displayHeight * aspectRatio;
+                        
+                        ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - displayWidth) * 0.5f);
+                        ImGui::Image((ImTextureID)(intptr_t)textureCache[imageUrl], 
+                                    ImVec2(displayWidth, displayHeight));
+                    } else {
+                        ImGui::TextWrapped("Image loading failed");
                     }
                 }
                 else if (bookData.size() >= 3)
