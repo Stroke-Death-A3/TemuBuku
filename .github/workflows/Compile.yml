@@ -1,12 +1,9 @@
-# .github/workflows/cross-platform.yml
 name: Cross-Platform Build
-
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
 jobs:
   build:
     name: Build on ${{ matrix.os }}
@@ -25,12 +22,11 @@ jobs:
           - os: macos-latest
             compiler: clang++
             build_type: Release
-
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
-
+    
     - name: Cache Dependencies
       uses: actions/cache@v3
       with:
@@ -40,7 +36,7 @@ jobs:
           ~/AppData/Local/Temp/chocolatey
           C:/msys64
         key: ${{ runner.os }}-deps-${{ hashFiles('**/Makefile') }}
-
+    
     - name: Install Dependencies (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
       run: |
@@ -52,7 +48,7 @@ jobs:
           xorg-dev \
           pkg-config \
           clang
-
+    
     - name: Install Dependencies (macOS)
       if: matrix.os == 'macos-latest'
       run: |
@@ -60,7 +56,7 @@ jobs:
         brew install glfw
         brew install llvm
         brew install pkg-config
-
+    
     - name: Install Dependencies (Windows)
       if: matrix.os == 'windows-latest'
       uses: msys2/setup-msys2@v2
@@ -71,25 +67,15 @@ jobs:
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-glfw
           mingw-w64-x86_64-clang
-
-    - name: Build (Unix)
-      if: matrix.os != 'windows-latest'
-      working-directory: ./src
-      run: |
-        make clean
-        CXX=${{ matrix.compiler }} make
-
-   
+    
     - name: Build
-      shell: msys2 {0}
       working-directory: ./src
+      shell: bash
       run: |
         mkdir -p build bin
         make clean
-        make
-      env:
-        CXX: clang++
-
+        CXX=${{ matrix.compiler }} make
+    
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
@@ -97,16 +83,13 @@ jobs:
         path: |
           src/bin/TemuBuku*
         if-no-files-found: error
-
-    - name: Test Run (Unix)
-      if: matrix.os != 'windows-latest'
+    
+    - name: Test Run
       working-directory: ./src/bin
+      shell: bash
       run: |
-        ./TemuBuku --version || true
-
-    - name: Test Run (Windows)
-      if: matrix.os == 'windows-latest'
-      working-directory: ./src/bin
-      shell: msys2 {0}
-      run: |
-        ./TemuBuku.exe --version || true
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          ./TemuBuku.exe --version || true
+        else
+          ./TemuBuku --version || true
+        fi
