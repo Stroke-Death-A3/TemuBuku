@@ -43,7 +43,9 @@ jobs:
           libgl1-mesa-dev \
           libglfw3-dev \
           pkg-config \
-          clang
+          clang \
+          libglu1-mesa-dev \
+          mesa-common-dev
     - name: Install Dependencies (macOS)
       if: matrix.os == 'macos-latest'
       run: |
@@ -70,7 +72,7 @@ jobs:
         make clean
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
           CXX=clang++ \
-          CXXFLAGS="-I/mingw64/include -I/mingw64/include/glfw" \
+          CXXFLAGS="-I/mingw64/include -I/mingw64/include/glfw -I/mingw64/include/GL" \
           LDFLAGS="-L/mingw64/lib" \
           make PKGCONFIG=echo
         else
