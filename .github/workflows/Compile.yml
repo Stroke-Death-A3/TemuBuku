@@ -1,0 +1,65 @@
+# .github/workflows/build.yml
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install Dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libglfw3-dev libgl1-mesa-dev xorg-dev pkg-config
+
+    - name: Install Dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew update
+        brew install glfw
+
+    - name: Install Dependencies (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: >-
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-glfw
+
+    - name: Build (Unix)
+      if: matrix.os != 'windows-latest'
+      working-directory: ./src
+      run: |
+        make clean
+        make
+
+    - name: Build (Windows)
+      if: matrix.os == 'windows-latest'
+      working-directory: ./src
+      shell: msys2 {0}
+      run: |
+        make clean
+        make
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: TemuBuku-${{ matrix.os }}
+        path: |
+          src/bin/TemuBuku*
