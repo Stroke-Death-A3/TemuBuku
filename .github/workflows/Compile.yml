@@ -55,8 +55,8 @@ jobs:
         install: >-
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-glfw
+          mingw-w64-x86_64-opengl-headers
           mingw-w64-x86_64-clang
-          
 
     - name: Build
       working-directory: ./src
@@ -65,9 +65,10 @@ jobs:
         mkdir -p build bin
         make clean
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
-          CXXFLAGS="-I/mingw64/include/GL" \
-          LDFLAGS="-L/mingw64/lib -lopengl32" \
-          CXX=clang++ make
+          CXX=clang++ \
+          CXXFLAGS="-I/mingw64/include -I/mingw64/include/glfw" \
+          LDFLAGS="-L/mingw64/lib" \
+          make
         else
           CXX=${{ matrix.compiler }} make
         fi
