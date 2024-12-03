@@ -32,8 +32,8 @@ jobs:
       shell: powershell
       run: |
         choco install strawberryperl
-        cpan App::cpanminus
-        cpanm Pod::Usage
+        cpanm --force Pod::Usage
+    
     - name: Install Dependencies (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
       run: |
@@ -64,6 +64,8 @@ jobs:
           mingw-w64-x86_64-glfw
           mingw-w64-x86_64-clang
           mingw-w64-x86_64-glew
+          mingw-w64-x86_64-pkg-config
+    
     - name: Build
       working-directory: ./src
       shell: bash
@@ -72,9 +74,9 @@ jobs:
         make clean
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
           CXX=clang++ \
-          CXXFLAGS="-I/mingw64/include -I/mingw64/include/glfw -DGLEW_STATIC" \
-          LDFLAGS="-L/mingw64/lib -lglew32 -lopengl32" \
-          make PKGCONFIG=echo
+          CXXFLAGS="-I/mingw64/include -I/mingw64/include/GLFW -DGLEW_STATIC" \
+          LDFLAGS="-L/mingw64/lib -lglew32 -lopengl32 -lglfw3" \
+          make PKGCONFIG=/mingw64/bin/pkg-config
         else
           CXX=${{ matrix.compiler }} make
         fi
