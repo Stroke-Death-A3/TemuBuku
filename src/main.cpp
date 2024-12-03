@@ -1,8 +1,14 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include <stdio.h>// Load before GLFW
+#include <stdio.h>
 #define GL_GLEXT_PROTOTYPES
+#ifdef _WIN32
+#include <GL/glew.h>
+#ifndef GL_CLAMP_TO_EDGE
+#define GL_CLAMP_TO_EDGE 0x812F
+#endif
+#endif
 #include "glfw3.h"
 #include <string>
 #include <vector>

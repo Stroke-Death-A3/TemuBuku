@@ -72,8 +72,8 @@ jobs:
         make clean
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
           CXX=clang++ \
-          CXXFLAGS="-I/mingw64/include -I/mingw64/include/glfw -I/mingw64/include/glew" \
-          LDFLAGS="-L/mingw64/lib" \
+          CXXFLAGS="-I/mingw64/include -I/mingw64/include/glfw -DGLEW_STATIC" \
+          LDFLAGS="-L/mingw64/lib -lglew32 -lopengl32" \
           make PKGCONFIG=echo
         else
           CXX=${{ matrix.compiler }} make
