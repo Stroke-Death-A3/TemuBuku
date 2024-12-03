@@ -59,6 +59,7 @@ jobs:
         brew update
         brew install glfw
         brew install llvm
+        brew install pkg-config
 
     - name: Install Dependencies (Windows)
       if: matrix.os == 'windows-latest'
@@ -78,13 +79,16 @@ jobs:
         make clean
         CXX=${{ matrix.compiler }} make
 
-    - name: Build (Windows)
-      if: matrix.os == 'windows-latest'
-      working-directory: ./src
+   
+    - name: Build
       shell: msys2 {0}
+      working-directory: ./src
       run: |
+        mkdir -p build bin
         make clean
-        CXX=${{ matrix.compiler }} make
+        make
+      env:
+        CXX: clang++
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
