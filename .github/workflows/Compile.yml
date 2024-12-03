@@ -61,6 +61,7 @@ jobs:
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-glfw
           mingw-w64-x86_64-clang
+          mingw-w64-x86_64-gles-headers
     - name: Build
       working-directory: ./src
       shell: bash
@@ -71,7 +72,7 @@ jobs:
           CXX=clang++ \
           CXXFLAGS="-I/mingw64/include -I/mingw64/include/glfw" \
           LDFLAGS="-L/mingw64/lib" \
-          make
+          make PKGCONFIG=echo
         else
           CXX=${{ matrix.compiler }} make
         fi
