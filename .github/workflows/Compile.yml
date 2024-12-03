@@ -34,7 +34,9 @@ jobs:
       shell: powershell
       run: |
         choco install strawberryperl
-        cpanm --force Pod::Usage
+        refreshenv
+        cpan -i Pod::Usage
+        perl -v
     
     - name: Install Dependencies (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
@@ -78,9 +80,8 @@ jobs:
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
           export PATH="/mingw64/bin:$PATH"
           CXX=clang++ \
-          CXXFLAGS="-I/mingw64/include -I../imgui -I../backends $(pkg-config --cflags glfw3)" \
-          LDFLAGS="-L/mingw64/lib $(pkg-config --libs glfw3)" \
-          PKG_CONFIG_PATH="/mingw64/lib/pkgconfig" \
+          CXXFLAGS="-I/mingw64/include -I../imgui -I../backends" \
+          LDFLAGS="-L/mingw64/lib -lglfw3dll" \
           make
         elif [ "${{ matrix.os }}" == "macos-latest" ]; then
           CXX=${{ matrix.compiler }} \
