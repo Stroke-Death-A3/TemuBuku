@@ -74,10 +74,12 @@ jobs:
         mkdir -p build bin
         make clean
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          export PATH="/mingw64/bin:$PATH"
           CXX=clang++ \
-          CXXFLAGS="-I/mingw64/include -I/mingw64/include/GLFW -I ../backends -DGLEW_STATIC" \
-          LDFLAGS="-L/mingw64/lib -lglew32 -lopengl32 -lglfw3" \
-          make PKGCONFIG=/mingw64/bin/pkg-config
+          CXXFLAGS="-I/mingw64/include -I../imgui -I../backends" \
+          LDFLAGS="-L/mingw64/lib" \
+          PKG_CONFIG_PATH="/mingw64/lib/pkgconfig" \
+          make
         elif [ "${{ matrix.os }}" == "macos-latest" ]; then
           CXX=${{ matrix.compiler }} \
           CXXFLAGS="-I/usr/local/include -I/opt/homebrew/include" \
