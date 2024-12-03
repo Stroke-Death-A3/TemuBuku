@@ -27,28 +27,17 @@ jobs:
       with:
         submodules: recursive
     
-    - name: Cache Dependencies
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cache/pip
-          ~/Library/Caches/Homebrew
-          ~/AppData/Local/Temp/chocolatey
-          C:/msys64
-        key: ${{ runner.os }}-deps-${{ hashFiles('**/Makefile') }}
-    
     - name: Install Dependencies (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
         sudo apt-get install -y \
           build-essential \
-          libglfw3-dev \
           libgl1-mesa-dev \
-          xorg-dev \
+          libglfw3-dev \
           pkg-config \
           clang
-    
+
     - name: Install Dependencies (macOS)
       if: matrix.os == 'macos-latest'
       run: |
@@ -56,7 +45,7 @@ jobs:
         brew install glfw
         brew install llvm
         brew install pkg-config
-    
+
     - name: Install Dependencies (Windows)
       if: matrix.os == 'windows-latest'
       uses: msys2/setup-msys2@v2
@@ -66,16 +55,23 @@ jobs:
         install: >-
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-glfw
+          mingw-w64-x86_64-opengl-headers
           mingw-w64-x86_64-clang
-    
+
     - name: Build
       working-directory: ./src
       shell: bash
       run: |
         mkdir -p build bin
         make clean
-        CXX=${{ matrix.compiler }} make
-    
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          CXXFLAGS="-I/mingw64/include/GL" \
+          LDFLAGS="-L/mingw64/lib -lopengl32" \
+          CXX=clang++ make
+        else
+          CXX=${{ matrix.compiler }} make
+        fi
+
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
@@ -83,7 +79,7 @@ jobs:
         path: |
           src/bin/TemuBuku*
         if-no-files-found: error
-    
+
     - name: Test Run
       working-directory: ./src/bin
       shell: bash
