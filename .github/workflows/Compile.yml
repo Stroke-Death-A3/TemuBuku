@@ -35,7 +35,7 @@ jobs:
       run: |
         choco install strawberryperl
         refreshenv
-        cpan -i Pod::Usage
+        cpan install Pod::Usage
         perl -v
     
     - name: Install Dependencies (Ubuntu)
@@ -80,7 +80,7 @@ jobs:
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
           export PATH="/mingw64/bin:$PATH"
           CXX=clang++ \
-          CXXFLAGS="-I/mingw64/include -I../imgui -I../backends" \
+          CXXFLAGS="-I/mingw64/include -I../imgui -I../backends -D_CRT_SECURE_NO_WARNINGS" \
           LDFLAGS="-L/mingw64/lib -lglfw3dll" \
           make
         elif [ "${{ matrix.os }}" == "macos-latest" ]; then
