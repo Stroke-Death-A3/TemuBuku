@@ -75,7 +75,7 @@ jobs:
         make clean
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
           CXX=clang++ \
-          CXXFLAGS="-I/mingw64/include -I/mingw64/include/GLFW -I../backends -DGLEW_STATIC" \
+          CXXFLAGS="-I/mingw64/include -I/mingw64/include/GLFW -I ../backends -DGLEW_STATIC" \
           LDFLAGS="-L/mingw64/lib -lglew32 -lopengl32 -lglfw3" \
           make PKGCONFIG=/mingw64/bin/pkg-config
         elif [ "${{ matrix.os }}" == "macos-latest" ]; then
