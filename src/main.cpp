@@ -4,7 +4,6 @@
 #include <stdio.h>
 #define GL_GLEXT_PROTOTYPES
 #ifdef _WIN32
-#include <GL/glew.h>
 #ifndef GL_CLAMP_TO_EDGE
 #define GL_CLAMP_TO_EDGE 0x812F
 #endif
