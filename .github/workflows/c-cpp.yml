@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: cd
+      run: cd ./TemuBuku/src/
     - uses: actions/checkout@v4
     - name: make
       run: make
