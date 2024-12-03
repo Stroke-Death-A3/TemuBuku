@@ -12,12 +12,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: cd
-      run: cd ./TemuBuku/src/
     - uses: actions/checkout@v4
+    - name : Setup TemuBuku
+      working-directory: ./src
     - name: make
       run: make
+      working-directory: ./src
     - name: make check
       run: make check
+      working-directory: ./src
     - name: make distcheck
       run: make distcheck
+      working-directory: ./src
