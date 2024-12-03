@@ -13,14 +13,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name : Setup TemuBuku
-      working-directory: ./src
     - name: make
+      working-directory: ./src
       run: make
-      working-directory: ./src
     - name: make check
+      working-directory: ./src
       run: make check
-      working-directory: ./src
     - name: make distcheck
-      run: make distcheck
       working-directory: ./src
+      run: make distcheck
