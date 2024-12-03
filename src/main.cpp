@@ -22,6 +22,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "./Process/Gimik.cpp"
+#include <filesystem>
 
 using TextureID = GLuint;
 
@@ -125,13 +126,21 @@ int main(int, char **)
     ImVec4 clear_color = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
 
     // Book search setup
-    std::string path = "../Process/datasets/books.csv";
+    std::filesystem::path datasetDir = "./datasets";
+    std::filesystem::path booksPath = datasetDir / "books.csv";
+
+    // Create datasets directory if it doesn't exist
+    if (!std::filesystem::exists(datasetDir)) {
+        std::filesystem::create_directories(datasetDir);
+    }
+
+    // Initialize book handling
     RBTree rbtree1;
     File fileHandler(rbtree1);
 
     try
     {
-        fileHandler.openFile(path);
+        fileHandler.openFile(booksPath.string());
         fileHandler.parseFile();
     }
     catch (const std::exception &e)
