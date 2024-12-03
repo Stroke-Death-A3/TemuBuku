@@ -63,7 +63,7 @@ jobs:
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-glfw
           mingw-w64-x86_64-clang
-          mingw-w64-x86_64-gles-headers
+          mingw-w64-x86_64-glew
     - name: Build
       working-directory: ./src
       shell: bash
@@ -72,7 +72,7 @@ jobs:
         make clean
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
           CXX=clang++ \
-          CXXFLAGS="-I/mingw64/include -I/mingw64/include/glfw -I/mingw64/include/GL" \
+          CXXFLAGS="-I/mingw64/include -I/mingw64/include/glfw -I/mingw64/include/glew" \
           LDFLAGS="-L/mingw64/lib" \
           make PKGCONFIG=echo
         else
