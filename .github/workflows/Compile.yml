@@ -78,8 +78,8 @@ jobs:
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
           export PATH="/mingw64/bin:$PATH"
           CXX=clang++ \
-          CXXFLAGS="-I/mingw64/include -I../imgui -I../backends" \
-          LDFLAGS="-L/mingw64/lib" \
+          CXXFLAGS="-I/mingw64/include -I../imgui -I../backends $(pkg-config --cflags glfw3)" \
+          LDFLAGS="-L/mingw64/lib $(pkg-config --libs glfw3)" \
           PKG_CONFIG_PATH="/mingw64/lib/pkgconfig" \
           make
         elif [ "${{ matrix.os }}" == "macos-latest" ]; then
