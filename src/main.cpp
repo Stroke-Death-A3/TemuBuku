@@ -3,7 +3,7 @@
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>// Load before GLFW
 #define GL_GLEXT_PROTOTYPES
-#include <GLFW/glfw3.h>
+#include "glfw3.h"
 #include <string>
 #include <vector>
 #include <iostream>
