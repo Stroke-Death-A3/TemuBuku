@@ -1,5 +1,5 @@
-# .github/workflows/build.yml
-name: Build
+# .github/workflows/cross-platform.yml
+name: Cross-Platform Build
 
 on:
   push:
@@ -12,25 +12,53 @@ jobs:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: windows-latest
+            compiler: clang++
+            build_type: Release
+          - os: ubuntu-latest
+            compiler: clang++
+            build_type: Release
+          - os: macos-latest
+            compiler: clang++
+            build_type: Release
 
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
 
+    - name: Cache Dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/pip
+          ~/Library/Caches/Homebrew
+          ~/AppData/Local/Temp/chocolatey
+          C:/msys64
+        key: ${{ runner.os }}-deps-${{ hashFiles('**/Makefile') }}
+
     - name: Install Dependencies (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libglfw3-dev libgl1-mesa-dev xorg-dev pkg-config
+        sudo apt-get install -y \
+          build-essential \
+          libglfw3-dev \
+          libgl1-mesa-dev \
+          xorg-dev \
+          pkg-config \
+          clang
 
     - name: Install Dependencies (macOS)
       if: matrix.os == 'macos-latest'
       run: |
         brew update
         brew install glfw
+        brew install llvm
 
     - name: Install Dependencies (Windows)
       if: matrix.os == 'windows-latest'
@@ -41,13 +69,14 @@ jobs:
         install: >-
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-glfw
+          mingw-w64-x86_64-clang
 
     - name: Build (Unix)
       if: matrix.os != 'windows-latest'
       working-directory: ./src
       run: |
         make clean
-        make
+        CXX=${{ matrix.compiler }} make
 
     - name: Build (Windows)
       if: matrix.os == 'windows-latest'
@@ -55,7 +84,7 @@ jobs:
       shell: msys2 {0}
       run: |
         make clean
-        make
+        CXX=${{ matrix.compiler }} make
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
@@ -63,3 +92,17 @@ jobs:
         name: TemuBuku-${{ matrix.os }}
         path: |
           src/bin/TemuBuku*
+        if-no-files-found: error
+
+    - name: Test Run (Unix)
+      if: matrix.os != 'windows-latest'
+      working-directory: ./src/bin
+      run: |
+        ./TemuBuku --version || true
+
+    - name: Test Run (Windows)
+      if: matrix.os == 'windows-latest'
+      working-directory: ./src/bin
+      shell: msys2 {0}
+      run: |
+        ./TemuBuku.exe --version || true
