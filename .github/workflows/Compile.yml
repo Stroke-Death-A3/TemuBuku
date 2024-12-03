@@ -81,7 +81,7 @@ jobs:
           export PATH="/mingw64/bin:$PATH"
           CXX=clang++ \
           CXXFLAGS="-I/mingw64/include -I../imgui -I../backends -D_CRT_SECURE_NO_WARNINGS" \
-          LDFLAGS="-L/mingw64/lib -lglfw3dll" \
+          LDFLAGS="-L/mingw64/lib -lglfw3dll -lgdi32 -lopengl32 -limm32 -lglew32" \
           make
         elif [ "${{ matrix.os }}" == "macos-latest" ]; then
           CXX=${{ matrix.compiler }} \
