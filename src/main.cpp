@@ -21,6 +21,9 @@
 
 using TextureID = GLuint;
 
+// Add this after TextureID declaration
+std::unordered_map<std::string, TextureID> textureCache;
+
 static void glfw_error_callback(int error, const char *description)
 {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
@@ -200,9 +203,11 @@ int main(int, char **)
             searchTriggered = true;
         }
 
-        // Process search if triggered by either method
+        // Modify the search trigger section:
         if (searchTriggered)
         {
+            // Clear previous results to prevent memory buildup
+            searchResults.clear();
             std::string searchString(searchTerm);
             searchResults = rbtree1.searchValue(searchString);
         }
@@ -464,7 +469,6 @@ int main(int, char **)
                     ImGui::Separator();
 
                     // Image handling
-                    static std::unordered_map<std::string, TextureID> textureCache;
                     std::string imageUrl = bookData[6];
                     imageUrl.erase(remove(imageUrl.begin(), imageUrl.end(), '"'), imageUrl.end());
 
@@ -472,9 +476,11 @@ int main(int, char **)
                     if (textureCache.find(imageUrl) == textureCache.end()) {
                         TextureID tex = LoadTextureFromURL(imageUrl.c_str());
                         if (tex) {
-                            // If there was an old texture, delete it
-                            if (textureCache[imageUrl]) {
-                                glDeleteTextures(1, &textureCache[imageUrl]);
+                            auto it = textureCache.find(imageUrl);
+                            if (it != textureCache.end()) {
+                                // Delete old texture before replacing
+                                glDeleteTextures(1, &it->second);
+                                textureCache.erase(it);
                             }
                             textureCache[imageUrl] = tex;
                         }
@@ -542,6 +548,17 @@ int main(int, char **)
 
         glfwSwapBuffers(window);
     }
+
+    // Cleanup textures
+    for (const auto& pair : textureCache) {
+        if (pair.second) {
+            glDeleteTextures(1, &pair.second);
+        }
+    }
+    textureCache.clear();
+
+    // Clear search results
+    searchResults.clear();
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
