@@ -99,17 +99,18 @@ jobs:
       with:
         name: TemuBuku-${{ matrix.os }}-${{ github.ref_name }}
         path: |
-          ${{ matrix.os == 'windows-latest' && 'build/Release/TemuBuku.exe' || 'src/bin/TemuBuku*' }}
+          ${{ matrix.os == 'windows-latest' && 'build/Release/TemuBuku.exe' || 'src/bin/TemuBuku' }}
         if-no-files-found: error
+
     - name: Test Run
-      working-directory: ./src/bin
       shell: bash
       run: |
         if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          cd build/Release
           ./TemuBuku.exe --version || true
         else
+          cd src/bin
           ./TemuBuku --version || true
-        fi
 
   release:
     needs: build
