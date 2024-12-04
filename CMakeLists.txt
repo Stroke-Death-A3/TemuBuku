@@ -54,7 +54,12 @@ add_custom_target(generate_embedded_fonts
 
 # Create the main executable target
 if(WIN32)
-    add_executable(TemuBuku
+    # Copy GLFW DLL from vcpkg for embedding
+    file(COPY "${VCPKG_ROOT}/installed/x64-windows/bin/glfw3.dll" 
+         DESTINATION "${CMAKE_SOURCE_DIR}/src")
+
+    # Add resource file to Windows build
+    add_executable(TemuBuku WIN32
         src/main.cpp
         src/windows_main.cpp  # Add Windows-specific entry point
         src/font_resources.h  # Add this new header
@@ -67,7 +72,11 @@ if(WIN32)
         backends/imgui_impl_opengl3.cpp
         "${SRC_BUILD_DIR}/embedded_fonts.h"  # Add the generated header
         "${SRC_BUILD_DIR}/embedded_fonts.cpp"  # Add the generated source
+        src/resources.rc
     )
+
+    # Enable resource compilation
+    set_property(TARGET TemuBuku PROPERTY WIN32_EXECUTABLE TRUE)
 else()
     add_executable(TemuBuku
         src/main.cpp
