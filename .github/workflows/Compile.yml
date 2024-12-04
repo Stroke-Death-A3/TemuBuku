@@ -1,7 +1,8 @@
 name: Cross-Platform Build
 on:
   push:
-    tags: [ 'v*' ]  # Only trigger on version tags
+    tags: [ 'v*' ]  # Only run on tag pushes starting with 'v'
+
 jobs:
   build:
     name: Build on ${{ matrix.os }}
