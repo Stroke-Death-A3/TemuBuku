@@ -1,15 +1,16 @@
 #pragma once
 #include <string>
 
-const unsigned char PLAY_CHICKENS_FONT[] = {/* font data */};
-const unsigned int PLAY_CHICKENS_FONT_SIZE = sizeof(PLAY_CHICKENS_FONT);
-
-const unsigned char ROBOTO_REGULAR_FONT[] = {/* font data */};
-const unsigned int ROBOTO_REGULAR_FONT_SIZE = sizeof(ROBOTO_REGULAR_FONT);
+// External declarations of font data
+extern const unsigned char PLAY_CHICKENS_FONT[16];
+extern const unsigned int PLAY_CHICKENS_FONT_SIZE;
+extern const unsigned char ROBOTO_REGULAR_FONT[16];
+extern const unsigned int ROBOTO_REGULAR_FONT_SIZE;
 
 struct EmbeddedFont {
     const unsigned char* data;
     const unsigned int size;
+    bool isValid() const { return data != nullptr && size > 100; }
 };
 
 inline EmbeddedFont getEmbeddedFont(const char* fontName) {

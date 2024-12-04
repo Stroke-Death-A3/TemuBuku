@@ -18,6 +18,7 @@ IMGUI_DIR = ../
 BIN_DIR = ./bin
 BUILD_DIR = ./build
 SOURCES = main.cpp
+SOURCES += $(BUILD_DIR)/embedded_fonts.cpp  # Add this line
 SOURCES += $(IMGUI_DIR)/imgui/imgui.cpp $(IMGUI_DIR)/imgui/imgui_demo.cpp $(IMGUI_DIR)/imgui/imgui_draw.cpp $(IMGUI_DIR)/imgui/imgui_tables.cpp $(IMGUI_DIR)/imgui/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
 OBJS = $(addprefix $(BUILD_DIR)/, $(notdir $(SOURCES:.cpp=.o)))
@@ -94,18 +95,43 @@ $(BUILD_DIR)/%.o: $(IMGUI_DIR)/imgui/%.cpp
 $(BUILD_DIR)/%.o: $(IMGUI_DIR)/backends/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-$(BUILD_DIR)/embedded_fonts.h: $(IMGUI_DIR)/src/font/Play-Chickens.otf $(IMGUI_DIR)/src/font/Roboto-Regular.ttf
-	@echo "Generating embedded fonts header..."
-	@xxd -i $(IMGUI_DIR)/src/font/Play-Chickens.otf > $@.tmp
-	@xxd -i $(IMGUI_DIR)/src/font/Roboto-Regular.ttf >> $@.tmp
-	@sed 's/unsigned char/static const unsigned char/g' $@.tmp > $@
-	@rm $@.tmp
+# Add rule to generate embedded fonts
+$(BUILD_DIR)/embedded_fonts.h $(BUILD_DIR)/embedded_fonts.cpp:
+	@echo "Generating embedded fonts files..."
+	@echo "#pragma once" > $(BUILD_DIR)/embedded_fonts.h
+	@echo "extern const unsigned char PLAY_CHICKENS_FONT[];" >> $(BUILD_DIR)/embedded_fonts.h
+	@echo "extern const unsigned int PLAY_CHICKENS_FONT_SIZE;" >> $(BUILD_DIR)/embedded_fonts.h
+	@echo "extern const unsigned char ROBOTO_REGULAR_FONT[];" >> $(BUILD_DIR)/embedded_fonts.h
+	@echo "extern const unsigned int ROBOTO_REGULAR_FONT_SIZE;" >> $(BUILD_DIR)/embedded_fonts.h
+	
+	@echo "#include \"embedded_fonts.h\"" > $(BUILD_DIR)/embedded_fonts.cpp
+	@echo "const unsigned char PLAY_CHICKENS_FONT[] = {" >> $(BUILD_DIR)/embedded_fonts.cpp
+	@xxd -i < $(IMGUI_DIR)/src/font/Play-Chickens.otf | grep -v "unsigned" | grep -v ".*_len.*=.*" >> $(BUILD_DIR)/embedded_fonts.cpp
+	@echo "};" >> $(BUILD_DIR)/embedded_fonts.cpp
+	@echo -n "const unsigned int PLAY_CHICKENS_FONT_SIZE = " >> $(BUILD_DIR)/embedded_fonts.cpp
+	@wc -c < $(IMGUI_DIR)/src/font/Play-Chickens.otf >> $(BUILD_DIR)/embedded_fonts.cpp
+	@echo ";" >> $(BUILD_DIR)/embedded_fonts.cpp
+	
+	@echo "const unsigned char ROBOTO_REGULAR_FONT[] = {" >> $(BUILD_DIR)/embedded_fonts.cpp
+	@xxd -i < $(IMGUI_DIR)/src/font/Roboto-Regular.ttf | grep -v "unsigned" | grep -v ".*_len.*=.*" >> $(BUILD_DIR)/embedded_fonts.cpp
+	@echo "};" >> $(BUILD_DIR)/embedded_fonts.cpp
+	@echo -n "const unsigned int ROBOTO_REGULAR_FONT_SIZE = " >> $(BUILD_DIR)/embedded_fonts.cpp
+	@wc -c < $(IMGUI_DIR)/src/font/Roboto-Regular.ttf >> $(BUILD_DIR)/embedded_fonts.cpp
+	@echo ";" >> $(BUILD_DIR)/embedded_fonts.cpp
+
+# Update object dependencies
+$(BUILD_DIR)/%.o: $(BUILD_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD_DIR)/embedded_fonts.o: $(BUILD_DIR)/embedded_fonts.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJS): $(BUILD_DIR)/embedded_fonts.h
 
-$(BIN_DIR)/$(EXE): $(OBJS)
+$(BIN_DIR)/$(EXE): $(OBJS) $(BUILD_DIR)/embedded_fonts.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
 
+# Update clean target to remove generated files
 clean:
-	rm -rf $(BUILD_DIR)
-	rm -rf $(BIN_DIR)
+	rm -rf $(BUILD_DIR)/*
+	rm -rf $(BIN_DIR)/*

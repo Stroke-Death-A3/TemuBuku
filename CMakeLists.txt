@@ -33,9 +33,11 @@ else()
     message(FATAL_ERROR "Font file Roboto-Regular.ttf not found in ${FONT_DIR}")
 endif()
 
-# Generate embedded font headers first
+# Update custom command to generate both files
 add_custom_command(
-    OUTPUT "${CMAKE_BINARY_DIR}/embedded_fonts.h"
+    OUTPUT 
+        "${CMAKE_BINARY_DIR}/embedded_fonts.h"
+        "${CMAKE_BINARY_DIR}/embedded_fonts.cpp"
     COMMAND ${CMAKE_COMMAND} -P "${CMAKE_SOURCE_DIR}/cmake/GenerateEmbeddedFonts.cmake"
     DEPENDS "${FONT_DIR}/Play-Chickens.otf" "${FONT_DIR}/Roboto-Regular.ttf"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -58,6 +60,7 @@ if(WIN32)
         backends/imgui_impl_glfw.cpp
         backends/imgui_impl_opengl3.cpp
         "${CMAKE_BINARY_DIR}/embedded_fonts.h"  # Add the generated header
+        "${CMAKE_BINARY_DIR}/embedded_fonts.cpp"  # Add the generated source
     )
 else()
     add_executable(TemuBuku
@@ -71,6 +74,7 @@ else()
         backends/imgui_impl_glfw.cpp
         backends/imgui_impl_opengl3.cpp
         "${CMAKE_BINARY_DIR}/embedded_fonts.h"  # Add the generated header
+        "${CMAKE_BINARY_DIR}/embedded_fonts.cpp"  # Add the generated source
     )
 endif()
 
