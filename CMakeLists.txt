@@ -28,8 +28,7 @@ target_include_directories(TemuBuku PRIVATE
     ${CMAKE_SOURCE_DIR}/imgui
     ${CMAKE_SOURCE_DIR}/backends
     ${CMAKE_SOURCE_DIR}/include
-    $ENV{VCPKG_ROOT}/installed/x64-windows/include
-    $ENV{VCPKG_ROOT}/installed/x64-windows/include/GLFW
+    ${GLFW_INCLUDE_DIRS}
 )
 
 target_link_directories(TemuBuku PRIVATE
@@ -37,12 +36,19 @@ target_link_directories(TemuBuku PRIVATE
 )
 
 target_link_libraries(TemuBuku PRIVATE
-    glfw3
+    glfw
     OpenGL::GL
+    $<$<PLATFORM_ID:Windows>:opengl32>
 )
 
-if(MSVC)
+if(WIN32)
     set_target_properties(TemuBuku PROPERTIES
         VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        WIN32_EXECUTABLE TRUE
+    )
+    
+    target_compile_definitions(TemuBuku PRIVATE
+        UNICODE
+        _UNICODE
     )
 endif()
