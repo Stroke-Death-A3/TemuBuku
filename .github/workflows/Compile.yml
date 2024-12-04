@@ -109,13 +109,8 @@ jobs:
     - name: Test Run
       shell: bash
       run: |
-        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-          cd build/Release
-          ./TemuBuku.exe --version || true
-        else
           cd src/bin
           ./TemuBuku --version || true
-        fi
 
   release:
     needs: build
