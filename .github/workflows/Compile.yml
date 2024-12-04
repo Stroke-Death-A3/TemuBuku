@@ -69,7 +69,6 @@ jobs:
           mingw-w64-x86_64-glfw
           mingw-w64-x86_64-clang
           mingw-w64-x86_64-glew
-          mingw-w64-x86_64-pkg-config
 
     - name: Build
       working-directory: ./src
@@ -79,10 +78,9 @@ jobs:
         make clean
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
           export PATH="/mingw64/bin:$PATH"
-          export PKG_CONFIG_PATH="/mingw64/lib/pkgconfig"
           CXX=clang++ \
           CXXFLAGS="-I/mingw64/include" \
-          LDFLAGS="-L/mingw64/lib -lglfw3dll" \
+          LDFLAGS="-L/mingw64/lib -lglfw3 -lgdi32 -lopengl32 -limm32 -lglew32" \
           make
         elif [ "${{ matrix.os }}" == "macos-latest" ]; then
           CXX=${{ matrix.compiler }} \
