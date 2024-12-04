@@ -76,7 +76,10 @@ jobs:
       shell: bash
       run: |
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
-          cmake -B build -DCMAKE_TOOLCHAIN_FILE="${GITHUB_WORKSPACE}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          export VCPKG_ROOT="${GITHUB_WORKSPACE}/vcpkg"
+          cmake -B build \
+                -DCMAKE_TOOLCHAIN_FILE="${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" \
+                -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
         else
           cd src
