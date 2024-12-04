@@ -28,17 +28,16 @@ target_include_directories(TemuBuku PRIVATE
     ${CMAKE_SOURCE_DIR}/imgui
     ${CMAKE_SOURCE_DIR}/backends
     ${CMAKE_SOURCE_DIR}/include
-    ${GLFW_INCLUDE_DIRS}
+    $ENV{VCPKG_ROOT}/installed/x64-windows/include
+    $ENV{VCPKG_ROOT}/installed/x64-windows/include/GLFW
 )
 
-if(WIN32)
-    target_include_directories(TemuBuku PRIVATE
-        "$ENV{VCPKG_ROOT}/installed/x64-windows/include"
-    )
-endif()
+target_link_directories(TemuBuku PRIVATE
+    $ENV{VCPKG_ROOT}/installed/x64-windows/lib
+)
 
 target_link_libraries(TemuBuku PRIVATE
-    glfw
+    glfw3
     OpenGL::GL
 )
 
