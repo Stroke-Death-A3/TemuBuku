@@ -1,5 +1,5 @@
 # TemuBuku
-[![Cross-Platform Build](https://github.com/Stroke-Death-A3/TemuBuku/actions/workflows/Compile.yml/badge.svg)](https://github.com/Stroke-Death-A3/TemuBuku/actions/workflows/Compile.yml)
+[![Cross-Platform Build](https://github.com/Stroke-Death-A3/TemuBuku/actions/workflows/Compile.yml/badge.svg)](https://github.com/Stroke-Death-A3/TemuBuku/actions/workflows/Compile.yml) \\
 [![Cross-Platform Build](https://github.com/Stroke-Death-A3/TemuBuku/actions/workflows/Compile.yml/badge.svg?event=release)](https://github.com/Stroke-Death-A3/TemuBuku/actions/workflows/Compile.yml)
 TemuBuku is a book search application implemented using Red-Black Tree data structure in C++. The application provides efficient book searching capabilities through a balanced tree implementation. \
 ## Features
