@@ -91,8 +91,20 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup Visual Studio
+        uses: microsoft/setup-msbuild@v1.3.1
+
+      - name: Install GLFW
+        run: |
+          git clone https://github.com/glfw/glfw.git
+          cd glfw
+          cmake -B build -G "Visual Studio 17 2022" -A x64
+          cmake --build build --config Release --target install
+
       - name: Configure Win32 shared x86 library
-        run: cmake -B build-win32-shared-x86 -G "Visual Studio 17 2022" -A Win32 -D BUILD_SHARED_LIBS=ON .
+        run: |
+          cmake -B build-win32-shared-x86 -G "Visual Studio 17 2022" -A Win32 -D BUILD_SHARED_LIBS=ON \
+                -D CMAKE_PREFIX_PATH="C:/Program Files (x86)/GLFW" .
 
       - name: Build Win32 shared x86 library
         run: cmake --build build-win32-shared-x86 --config Release --parallel
