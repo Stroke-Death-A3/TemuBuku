@@ -28,7 +28,7 @@ function(embed_font OUTPUT_H OUTPUT_CPP FONT_PATH FONT_NAME)
     file(APPEND ${OUTPUT_CPP} "const unsigned int ${FONT_NAME}_SIZE = ${FONT_SIZE};\n")
 endfunction()
 
-# Generate Play Chickens font
+# Generate the embedded font files
 embed_font(
     "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.h"
     "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.cpp" 
@@ -44,13 +44,13 @@ embed_font(
     "ROBOTO_REGULAR_FONT"
 )
 
-# Merge Roboto font data
+# Merge the temporary files
 file(READ "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.h.tmp" ROBOTO_H)
 file(READ "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.cpp.tmp" ROBOTO_CPP)
 
 file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.h" "\n${ROBOTO_H}")
-file(APPEND("${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.cpp" "\n${ROBOTO_CPP}")
+file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.cpp" "\n${ROBOTO_CPP}")
 
 # Clean up temporary files
-file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.h.tmp") 
+file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.h.tmp")
 file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.cpp.tmp")
