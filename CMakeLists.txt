@@ -14,7 +14,7 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 
 # Define font directory paths
-set(FONT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/font")
+set(FONT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/font")
 set(FONT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/font")
 
 # Create font directory in build
