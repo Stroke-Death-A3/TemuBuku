@@ -28,15 +28,16 @@ target_include_directories(TemuBuku PRIVATE
     ${CMAKE_SOURCE_DIR}/imgui
     ${CMAKE_SOURCE_DIR}/backends
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/lib  # Add local lib directory
     ${GLFW_INCLUDE_DIRS}
-    # Add vcpkg include path for Windows
-    $<$<PLATFORM_ID:Windows>:${VCPKG_ROOT}/installed/x64-windows/include>
 )
 
 target_link_libraries(TemuBuku PRIVATE
     glfw
     OpenGL::GL
     $<$<PLATFORM_ID:Windows>:opengl32>
+    $<$<PLATFORM_ID:Windows>:gdi32>
+    $<$<PLATFORM_ID:Windows>:user32>
 )
 
 if(WIN32)
@@ -48,5 +49,6 @@ if(WIN32)
     target_compile_definitions(TemuBuku PRIVATE
         UNICODE
         _UNICODE
+        _CRT_SECURE_NO_WARNINGS
     )
 endif()
