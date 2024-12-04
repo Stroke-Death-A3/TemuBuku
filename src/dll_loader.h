@@ -5,7 +5,14 @@
 class DLLLoader {
 public:
     static bool ExtractAndLoadDLL() {
-        const char* tempPath = ".\\glfw3.dll";
+        char exePath[MAX_PATH];
+        GetModuleFileNameA(NULL, exePath, MAX_PATH);
+        std::string exeDir = std::string(exePath);
+        exeDir = exeDir.substr(0, exeDir.find_last_of("\\/"));
+        std::string tempPath = exeDir + "\\glfw3.dll";
+        
+        // Delete existing DLL if present
+        DeleteFileA(tempPath.c_str());
         
         // Fix resource type casting
         HRSRC hRes = FindResourceA(NULL, MAKEINTRESOURCEA(1), MAKEINTRESOURCEA(RT_RCDATA));
@@ -29,7 +36,7 @@ public:
 
         // Write to temp file with binary mode explicitly set
         FILE* fp;
-        if (fopen_s(&fp, tempPath, "wb") != 0) return false;
+        if (fopen_s(&fp, tempPath.c_str(), "wb") != 0) return false;
         
         if (fp != NULL) {
             size_t written = fwrite(pData, 1, size, fp);
@@ -41,7 +48,8 @@ public:
         }
 
         // Load the DLL and handle errors
-        HMODULE hModule = LoadLibraryA(tempPath);
+        SetDllDirectoryA(exeDir.c_str());  // Add DLL search path
+        HMODULE hModule = LoadLibraryA(tempPath.c_str());
         if (hModule == NULL) {
             DWORD error = GetLastError();
             char msg[256];
