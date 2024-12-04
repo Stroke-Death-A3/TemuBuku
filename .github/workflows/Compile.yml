@@ -60,15 +60,17 @@ jobs:
         brew install pkg-config
     - name: Install Dependencies (Windows)
       if: matrix.os == 'windows-latest'
-      run: |
-        git clone https://github.com/Microsoft/vcpkg.git
-        cd vcpkg
-        ./bootstrap-vcpkg.bat
-        ./vcpkg integrate install
-        ./vcpkg install glfw3:x64-windows
-        ./vcpkg install opengl:x64-windows
-      shell: cmd
-    
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: >-
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-glfw
+          mingw-w64-x86_64-clang
+          mingw-w64-x86_64-glew
+          mingw-w64-x86_64-pkg-config
+
     - name: Build
       working-directory: ./src
       shell: bash
@@ -76,10 +78,10 @@ jobs:
         mkdir -p build bin
         make clean
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
-          export PATH="/c/vcpkg/installed/x64-windows/bin:$PATH"
+          export PATH="/mingw64/bin:$PATH"
           CXX=clang++ \
-          CXXFLAGS="-I/c/vcpkg/installed/x64-windows/include" \
-          LDFLAGS="-L/c/vcpkg/installed/x64-windows/lib -lglfw3dll" \
+          CXXFLAGS="-I/mingw64/include" \
+          LDFLAGS="-L/mingw64/lib -lglfw3 -lgdi32 -lopengl32 -limm32" \
           make
         elif [ "${{ matrix.os }}" == "macos-latest" ]; then
           CXX=${{ matrix.compiler }} \
