@@ -1,11 +1,16 @@
 # Function to convert a font file to a C array
 function(embed_font OUTPUT_H OUTPUT_CPP FONT_PATH FONT_NAME)
-    # Create output directory if it doesn't exist
+    # Create output directory if it doesn't exist 
     get_filename_component(OUTPUT_DIR ${OUTPUT_H} DIRECTORY)
     file(MAKE_DIRECTORY ${OUTPUT_DIR})
     
+    # Convert to absolute paths
+    get_filename_component(ABS_OUTPUT_H ${OUTPUT_H} ABSOLUTE)
+    get_filename_component(ABS_OUTPUT_CPP ${OUTPUT_CPP} ABSOLUTE)
+    get_filename_component(ABS_FONT_PATH ${FONT_PATH} ABSOLUTE)
+    
     # Convert path separators
-    file(TO_CMAKE_PATH ${FONT_PATH} FONT_PATH_FIXED)
+    file(TO_CMAKE_PATH ${ABS_FONT_PATH} FONT_PATH_FIXED)
     
     # Read the font file content as binary 
     file(READ ${FONT_PATH_FIXED} FONT_DATA HEX)
@@ -23,23 +28,26 @@ function(embed_font OUTPUT_H OUTPUT_CPP FONT_PATH FONT_NAME)
     string(STRIP ${FONT_SIZE} FONT_SIZE)
     
     # Generate header content
-    file(WRITE ${OUTPUT_H} "#pragma once\n\n")
-    file(APPEND ${OUTPUT_H} "extern const unsigned char ${FONT_NAME}[];\n")
-    file(APPEND ${OUTPUT_H} "extern const unsigned int ${FONT_NAME}_SIZE;\n")
+    file(WRITE "${ABS_OUTPUT_H}" "#pragma once\n\n") 
+    file(APPEND "${ABS_OUTPUT_H}" "extern const unsigned char ${FONT_NAME}[];\n")
+    file(APPEND "${ABS_OUTPUT_H}" "extern const unsigned int ${FONT_NAME}_SIZE;\n")
     
-    # Generate cpp content 
-    file(WRITE ${OUTPUT_CPP} "#include \"embedded_fonts.h\"\n\n")
-    file(APPEND ${OUTPUT_CPP} "const unsigned char ${FONT_NAME}[] = {\n")
-    file(APPEND ${OUTPUT_CPP} "    ${FONT_BYTES}\n")
-    file(APPEND ${OUTPUT_CPP} "};\n\n")
-    file(APPEND ${OUTPUT_CPP} "const unsigned int ${FONT_NAME}_SIZE = ${FONT_SIZE};\n")
+    # Generate cpp content
+    file(WRITE "${ABS_OUTPUT_CPP}" "#include \"embedded_fonts.h\"\n\n")
+    file(APPEND "${ABS_OUTPUT_CPP}" "const unsigned char ${FONT_NAME}[] = {\n") 
+    file(APPEND "${ABS_OUTPUT_CPP}" "    ${FONT_BYTES}\n")
+    file(APPEND "${ABS_OUTPUT_CPP}" "};\n\n")
+    file(APPEND "${ABS_OUTPUT_CPP}" "const unsigned int ${FONT_NAME}_SIZE = ${FONT_SIZE};\n")
 endfunction()
 
+# Make build directory
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}")
+
 # Convert paths to absolute
-set(FONTS_H "${CMAKE_BINARY_DIR}/embedded_fonts.h")
-set(FONTS_CPP "${CMAKE_BINARY_DIR}/embedded_fonts.cpp") 
-set(PLAY_CHICKENS_FONT "${CMAKE_SOURCE_DIR}/src/font/Play-Chickens.otf")
-set(ROBOTO_FONT "${CMAKE_SOURCE_DIR}/src/font/Roboto-Regular.ttf")
+get_filename_component(FONTS_H "${CMAKE_BINARY_DIR}/embedded_fonts.h" ABSOLUTE)
+get_filename_component(FONTS_CPP "${CMAKE_BINARY_DIR}/embedded_fonts.cpp" ABSOLUTE)
+get_filename_component(PLAY_CHICKENS_FONT "${CMAKE_SOURCE_DIR}/src/font/Play-Chickens.otf" ABSOLUTE)
+get_filename_component(ROBOTO_FONT "${CMAKE_SOURCE_DIR}/src/font/Roboto-Regular.ttf" ABSOLUTE)
 
 # Generate fonts
 embed_font(
@@ -62,7 +70,7 @@ file(READ "${CMAKE_BINARY_DIR}/embedded_fonts.h.tmp" ROBOTO_H)
 file(READ "${CMAKE_BINARY_DIR}/embedded_fonts.cpp.tmp" ROBOTO_CPP)
 
 file(APPEND "${CMAKE_BINARY_DIR}/embedded_fonts.h" "\n${ROBOTO_H}")
-file(APPEND "${CMAKE_BINARY_DIR}/embedded_fonts.cpp" "\n${ROBOTO_CPP}")
+file(APPEND("${CMAKE_BINARY_DIR}/embedded_fonts.cpp" "\n${ROBOTO_CPP}")
 
 # Clean up temporary files
 file(REMOVE "${CMAKE_BINARY_DIR}/embedded_fonts.h.tmp")
