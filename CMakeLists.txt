@@ -54,15 +54,12 @@ add_custom_target(generate_embedded_fonts
 
 # Create the main executable target
 if(WIN32)
-    # Copy GLFW DLL from vcpkg for embedding
-    file(COPY "${VCPKG_ROOT}/installed/x64-windows/bin/glfw3.dll" 
-         DESTINATION "${CMAKE_SOURCE_DIR}/src")
-
-    # Add resource file to Windows build
-    add_executable(TemuBuku WIN32
+    # Set static runtime for Windows
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    
+    add_executable(TemuBuku
         src/main.cpp
-        src/windows_main.cpp  # Add Windows-specific entry point
-        src/font_resources.h  # Add this new header
+        src/font_resources.h
         imgui/imgui.cpp
         imgui/imgui_demo.cpp
         imgui/imgui_draw.cpp
@@ -70,13 +67,17 @@ if(WIN32)
         imgui/imgui_widgets.cpp
         backends/imgui_impl_glfw.cpp
         backends/imgui_impl_opengl3.cpp
-        "${SRC_BUILD_DIR}/embedded_fonts.h"  # Add the generated header
-        "${SRC_BUILD_DIR}/embedded_fonts.cpp"  # Add the generated source
-        src/resources.rc
+        "${SRC_BUILD_DIR}/embedded_fonts.h"
+        "${SRC_BUILD_DIR}/embedded_fonts.cpp"
     )
 
-    # Enable resource compilation
-    set_property(TARGET TemuBuku PROPERTY WIN32_EXECUTABLE TRUE)
+    # Add static linking flags
+    target_compile_definitions(TemuBuku PRIVATE
+        GLFW_STATIC
+        UNICODE
+        _UNICODE
+        _CRT_SECURE_NO_WARNINGS
+    )
 else()
     add_executable(TemuBuku
         src/main.cpp
@@ -116,11 +117,5 @@ target_link_libraries(TemuBuku PRIVATE
 if(WIN32)
     set_target_properties(TemuBuku PROPERTIES
         VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-    )
-    
-    target_compile_definitions(TemuBuku PRIVATE
-        UNICODE
-        _UNICODE
-        _CRT_SECURE_NO_WARNINGS
     )
 endif()
