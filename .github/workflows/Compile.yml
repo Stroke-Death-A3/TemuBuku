@@ -111,6 +111,7 @@ jobs:
         else
           cd src/bin
           ./TemuBuku --version || true
+        fi
 
   release:
     needs: build
