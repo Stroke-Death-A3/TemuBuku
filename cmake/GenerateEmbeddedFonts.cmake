@@ -1,7 +1,14 @@
 # Function to convert a font file to a C array
 function(embed_font OUTPUT_H OUTPUT_CPP FONT_PATH FONT_NAME)
+    # Create output directory if it doesn't exist
+    get_filename_component(OUTPUT_DIR ${OUTPUT_H} DIRECTORY)
+    file(MAKE_DIRECTORY ${OUTPUT_DIR})
+    
+    # Convert path separators
+    file(TO_CMAKE_PATH ${FONT_PATH} FONT_PATH_FIXED)
+    
     # Read the font file content as binary 
-    file(READ ${FONT_PATH} FONT_DATA HEX)
+    file(READ ${FONT_PATH_FIXED} FONT_DATA HEX)
     
     # Convert hex string to comma-separated bytes
     string(REGEX REPLACE "([0-9a-f][0-9a-f])" "0x\\1, " FONT_BYTES ${FONT_DATA})
@@ -10,7 +17,7 @@ function(embed_font OUTPUT_H OUTPUT_CPP FONT_PATH FONT_NAME)
     string(REGEX REPLACE ", $" "" FONT_BYTES ${FONT_BYTES})
     
     # Get the file size
-    file(SIZE ${FONT_PATH} FONT_SIZE)
+    file(SIZE ${FONT_PATH_FIXED} FONT_SIZE)
     
     # Clean up any unwanted newlines in size
     string(STRIP ${FONT_SIZE} FONT_SIZE)
@@ -28,29 +35,35 @@ function(embed_font OUTPUT_H OUTPUT_CPP FONT_PATH FONT_NAME)
     file(APPEND ${OUTPUT_CPP} "const unsigned int ${FONT_NAME}_SIZE = ${FONT_SIZE};\n")
 endfunction()
 
-# Generate the embedded font files
+# Convert paths to absolute
+set(FONTS_H "${CMAKE_BINARY_DIR}/embedded_fonts.h")
+set(FONTS_CPP "${CMAKE_BINARY_DIR}/embedded_fonts.cpp") 
+set(PLAY_CHICKENS_FONT "${CMAKE_SOURCE_DIR}/src/font/Play-Chickens.otf")
+set(ROBOTO_FONT "${CMAKE_SOURCE_DIR}/src/font/Roboto-Regular.ttf")
+
+# Generate fonts
 embed_font(
-    "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.cpp" 
-    "${CMAKE_SOURCE_DIR}/src/font/Play-Chickens.otf"
+    ${FONTS_H}
+    ${FONTS_CPP}
+    ${PLAY_CHICKENS_FONT}
     "PLAY_CHICKENS_FONT"
 )
 
-# Generate Roboto Regular font
+# Generate temp files
 embed_font(
-    "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.h.tmp"
-    "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.cpp.tmp"
-    "${CMAKE_SOURCE_DIR}/src/font/Roboto-Regular.ttf"
+    "${CMAKE_BINARY_DIR}/embedded_fonts.h.tmp"
+    "${CMAKE_BINARY_DIR}/embedded_fonts.cpp.tmp"
+    ${ROBOTO_FONT}
     "ROBOTO_REGULAR_FONT"
 )
 
 # Merge the temporary files
-file(READ "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.h.tmp" ROBOTO_H)
-file(READ "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.cpp.tmp" ROBOTO_CPP)
+file(READ "${CMAKE_BINARY_DIR}/embedded_fonts.h.tmp" ROBOTO_H)
+file(READ "${CMAKE_BINARY_DIR}/embedded_fonts.cpp.tmp" ROBOTO_CPP)
 
-file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.h" "\n${ROBOTO_H}")
-file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.cpp" "\n${ROBOTO_CPP}")
+file(APPEND "${CMAKE_BINARY_DIR}/embedded_fonts.h" "\n${ROBOTO_H}")
+file(APPEND "${CMAKE_BINARY_DIR}/embedded_fonts.cpp" "\n${ROBOTO_CPP}")
 
 # Clean up temporary files
-file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.h.tmp")
-file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/embedded_fonts.cpp.tmp")
+file(REMOVE "${CMAKE_BINARY_DIR}/embedded_fonts.h.tmp")
+file(REMOVE "${CMAKE_BINARY_DIR}/embedded_fonts.cpp.tmp")
