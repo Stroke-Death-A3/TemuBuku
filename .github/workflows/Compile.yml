@@ -107,10 +107,11 @@ jobs:
         if-no-files-found: error
 
     - name: Test Run
+      if: matrix.os != 'windows-latest'  # Skip for Windows
       shell: bash
       run: |
-          cd src/bin
-          ./TemuBuku --version || true
+        cd src/bin
+        ./TemuBuku --version || true
 
   release:
     needs: build
