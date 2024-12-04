@@ -7,17 +7,14 @@ on:
   pull_request:
     branches: [ "main" ]
 jobs:
-  build:
+  build-unix:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
         include:
-          - os: windows-latest
-            compiler: clang++
-            build_type: Release
           - os: ubuntu-latest
             compiler: clang++
             build_type: Release
@@ -28,15 +25,6 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
-    
-    - name: Install Perl Dependencies (Windows)
-      if: matrix.os == 'windows-latest'
-      shell: powershell
-      run: |
-        choco install strawberryperl
-        refreshenv
-        cpan install Pod::Usage
-        perl -v
     
     - name: Install Dependencies (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
@@ -58,18 +46,6 @@ jobs:
         brew install glfw
         brew install llvm
         brew install pkg-config
-    - name: Install Dependencies (Windows)
-      if: matrix.os == 'windows-latest'
-      uses: msys2/setup-msys2@v2
-      with:
-        msystem: MINGW64
-        update: true
-        install: >-
-          mingw-w64-x86_64-toolchain
-          mingw-w64-x86_64-glfw
-          mingw-w64-x86_64-clang
-          mingw-w64-x86_64-glew
-          mingw-w64-x86_64-pkg-config
     
     - name: Build
       working-directory: ./src
@@ -77,11 +53,7 @@ jobs:
       run: |
         mkdir -p build bin
         make clean
-        if [ "${{ matrix.os }}" == "windows-latest" ]; then
-          export PATH="/mingw64/bin:$PATH"
-          CXX=clang++ \
-          make
-        elif [ "${{ matrix.os }}" == "macos-latest" ]; then
+        if [ "${{ matrix.os }}" == "macos-latest" ]; then
           CXX=${{ matrix.compiler }} \
           CXXFLAGS="-I/usr/local/include -I/opt/homebrew/include" \
           make
@@ -90,6 +62,7 @@ jobs:
           CXXFLAGS="-I/usr/include/GLFW" \
           make
         fi
+
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
@@ -107,8 +80,46 @@ jobs:
           ./TemuBuku --version || true
         fi
 
+  build-windows:
+    name: Windows (VS2022)
+    runs-on: windows-latest
+    timeout-minutes: 4
+    env:
+      CFLAGS: /WX
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure Win32 shared x86 library
+        run: cmake -B build-win32-shared-x86 -G "Visual Studio 17 2022" -A Win32 -D BUILD_SHARED_LIBS=ON .
+
+      - name: Build Win32 shared x86 library
+        run: cmake --build build-win32-shared-x86 --config Release --parallel
+
+      - name: Configure Win32 static x64 library
+        run: cmake -B build-win32-static-x64 -G "Visual Studio 17 2022" -A x64 .
+
+      - name: Build Win32 static x64 library
+        run: cmake --build build-win32-static-x64 --config Release --parallel
+
+      - name: Configure Win32 shared x64 library
+        run: cmake -B build-win32-shared-x64 -G "Visual Studio 17 2022" -A x64 -D BUILD_SHARED_LIBS=ON .
+
+      - name: Build Win32 shared x64 library
+        run: cmake --build build-win32-shared-x64 --config Release --parallel
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: TemuBuku-windows-${{ github.ref_name }}
+          path: |
+            build-win32-shared-x64/Release/TemuBuku.exe
+            build-win32-shared-x64/Release/*.dll
+          if-no-files-found: error
+
   release:
-    needs: build
+    needs: [build-unix, build-windows]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
@@ -124,7 +135,7 @@ jobs:
         with:
           files: |
             artifacts/TemuBuku-ubuntu-latest-${{ github.ref_name }}/TemuBuku
-            artifacts/TemuBuku-windows-latest-${{ github.ref_name }}/TemuBuku.exe
+            artifacts/TemuBuku-windows-${{ github.ref_name }}/TemuBuku.exe
             artifacts/TemuBuku-macos-latest-${{ github.ref_name }}/TemuBuku
           draft: false
           prerelease: false
