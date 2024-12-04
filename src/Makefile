@@ -57,9 +57,16 @@ endif
 
 ifeq ($(OS), Windows_NT)
 	ECHO_MESSAGE = "MinGW"
-	LIBS += -L/mingw64/lib -lglfw3dll -lgdi32 -lopengl32 -limm32 -lglew32
-	CXXFLAGS += -I/mingw64/include $(shell pkg-config --cflags glfw3)
+	LIBS += -L/mingw64/lib -lglfw3 -lgdi32 -lopengl32 -limm32 -lglew32
+	CXXFLAGS += -I/mingw64/include
 	CFLAGS = $(CXXFLAGS)
+endif
+
+ifeq ($(OS), Windows_NT)
+    ECHO_MESSAGE = "Visual Studio"
+    LIBS += glfw3.lib opengl32.lib user32.lib gdi32.lib shell32.lib
+    CXXFLAGS += /EHsc /MD
+    CFLAGS = $(CXXFLAGS)
 endif
 
 ##---------------------------------------------------------------------
