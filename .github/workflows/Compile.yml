@@ -115,7 +115,6 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    # Only run on tag push and not on regular push or pull request
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     permissions:
       contents: write
@@ -125,8 +124,13 @@ jobs:
         with:
           path: artifacts
 
-      - name: Display structure of downloaded files
-        run: ls -R artifacts/
+      - name: Prepare Release Files
+        run: |
+          mkdir release
+          cp artifacts/TemuBuku-ubuntu-latest-*/TemuBuku release/TemuBuku-linux
+          cp artifacts/TemuBuku-windows-latest-*/TemuBuku.exe release/TemuBuku-windows.exe
+          cp artifacts/TemuBuku-macos-latest-*/TemuBuku release/TemuBuku-macos
+          chmod +x release/TemuBuku-*
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -134,9 +138,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: |
-            artifacts/TemuBuku-ubuntu-latest-*/TemuBuku
-            artifacts/TemuBuku-windows-latest-*/TemuBuku.exe
-            artifacts/TemuBuku-macos-latest-*/TemuBuku
+            release/TemuBuku-linux
+            release/TemuBuku-windows.exe
+            release/TemuBuku-macos
           draft: false
           prerelease: false
           generate_release_notes: true
