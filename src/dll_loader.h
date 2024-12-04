@@ -7,8 +7,8 @@ public:
     static bool ExtractAndLoadDLL() {
         const char* tempPath = ".\\glfw3.dll";
         
-        // Extract DLL from resources - use correct type for RT_RCDATA
-        HRSRC hRes = FindResourceA(NULL, MAKEINTRESOURCEA(1), RT_RCDATA);
+        // Fix resource type casting
+        HRSRC hRes = FindResourceA(NULL, MAKEINTRESOURCEA(1), MAKEINTRESOURCEA(RT_RCDATA));
         if (hRes == NULL) {
             // Get last error for debugging
             DWORD error = GetLastError();
