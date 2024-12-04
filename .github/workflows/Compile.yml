@@ -79,10 +79,10 @@ jobs:
         mkdir -p build bin
         make clean
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
-          export PATH="/c/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/*/bin/Hostx64/x64:$PATH"
+          export VCPKG_ROOT="${GITHUB_WORKSPACE}/vcpkg"
           CXX="cl.exe" \
-          CXXFLAGS="/I\"C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/*/include\" /I\"${GITHUB_WORKSPACE}/vcpkg/installed/x64-windows/include\"" \
-          LDFLAGS="/LIBPATH:\"${GITHUB_WORKSPACE}/vcpkg/installed/x64-windows/lib\" glfw3.lib" \
+          CXXFLAGS="/nologo /std:c++17" \
+          LDFLAGS="/LIBPATH:\"${VCPKG_ROOT}/installed/x64-windows/lib\"" \
           make
         elif [ "${{ matrix.os }}" == "macos-latest" ]; then
           CXX=${{ matrix.compiler }} \

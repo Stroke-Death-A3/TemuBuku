@@ -56,17 +56,18 @@ ifeq ($(UNAME_S), Darwin) #APPLE
 endif
 
 ifeq ($(OS), Windows_NT)
-	ECHO_MESSAGE = "MinGW"
-	LIBS += -L/mingw64/lib -lglfw3 -lgdi32 -lopengl32 -limm32 -lglew32
-	CXXFLAGS += -I/mingw64/include
-	CFLAGS = $(CXXFLAGS)
-endif
-
-ifeq ($(OS), Windows_NT)
-    ECHO_MESSAGE = "Visual Studio"
-    LIBS += glfw3.lib opengl32.lib user32.lib gdi32.lib shell32.lib
-    CXXFLAGS += /EHsc /MD
-    CFLAGS = $(CXXFLAGS)
+    ifeq ($(CXX),cl.exe)
+        ECHO_MESSAGE = "Visual Studio"
+        LIBS += glfw3.lib opengl32.lib user32.lib gdi32.lib shell32.lib
+        _CXXFLAGS = $(subst -O3,,$(CXXFLAGS))
+        CXXFLAGS = $(_CXXFLAGS) /O2 /EHsc /MD /I"$(VCPKG_ROOT)/installed/x64-windows/include"
+        CFLAGS = $(CXXFLAGS)
+    else
+        ECHO_MESSAGE = "MinGW"
+        LIBS += -L/mingw64/lib -lglfw3 -lgdi32 -lopengl32 -limm32 -lglew32
+        CXXFLAGS += -I/mingw64/include
+        CFLAGS = $(CXXFLAGS)
+    endif
 endif
 
 ##---------------------------------------------------------------------
