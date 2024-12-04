@@ -44,7 +44,7 @@ add_custom_command(
 )
 
 # Create the custom target for font generation
-add_custom_target(generate_embedded_fonts DEPENDS "${CMAKE_BINARY_DIR}/embedded_fonts.h")
+add_custom_target(generate_embedded_fonts DEPENDS "${CMAKE_BINARY_DIR}/embedded_fonts.h" "${CMAKE_BINARY_DIR}/embedded_fonts.cpp")
 
 # Create the main executable target
 if(WIN32)

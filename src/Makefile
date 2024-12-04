@@ -106,18 +106,14 @@ $(BUILD_DIR)/embedded_fonts.h $(BUILD_DIR)/embedded_fonts.cpp:
 	
 	@echo "#include \"embedded_fonts.h\"" > $(BUILD_DIR)/embedded_fonts.cpp
 	@echo "const unsigned char PLAY_CHICKENS_FONT[] = {" >> $(BUILD_DIR)/embedded_fonts.cpp
-	@xxd -i < $(IMGUI_DIR)/src/font/Play-Chickens.otf | grep -v "unsigned" | grep -v ".*_len.*=.*" >> $(BUILD_DIR)/embedded_fonts.cpp
+	@hexdump -v -e '16/1 "0x%02x," "\n"' font/Play-Chickens.otf >> $(BUILD_DIR)/embedded_fonts.cpp
 	@echo "};" >> $(BUILD_DIR)/embedded_fonts.cpp
-	@echo -n "const unsigned int PLAY_CHICKENS_FONT_SIZE = " >> $(BUILD_DIR)/embedded_fonts.cpp
-	@wc -c < $(IMGUI_DIR)/src/font/Play-Chickens.otf >> $(BUILD_DIR)/embedded_fonts.cpp
-	@echo ";" >> $(BUILD_DIR)/embedded_fonts.cpp
+	@echo "const unsigned int PLAY_CHICKENS_FONT_SIZE = $(shell stat -f%z font/Play-Chickens.otf);" >> $(BUILD_DIR)/embedded_fonts.cpp
 	
 	@echo "const unsigned char ROBOTO_REGULAR_FONT[] = {" >> $(BUILD_DIR)/embedded_fonts.cpp
-	@xxd -i < $(IMGUI_DIR)/src/font/Roboto-Regular.ttf | grep -v "unsigned" | grep -v ".*_len.*=.*" >> $(BUILD_DIR)/embedded_fonts.cpp
+	@hexdump -v -e '16/1 "0x%02x," "\n"' font/Roboto-Regular.ttf >> $(BUILD_DIR)/embedded_fonts.cpp 
 	@echo "};" >> $(BUILD_DIR)/embedded_fonts.cpp
-	@echo -n "const unsigned int ROBOTO_REGULAR_FONT_SIZE = " >> $(BUILD_DIR)/embedded_fonts.cpp
-	@wc -c < $(IMGUI_DIR)/src/font/Roboto-Regular.ttf >> $(BUILD_DIR)/embedded_fonts.cpp
-	@echo ";" >> $(BUILD_DIR)/embedded_fonts.cpp
+	@echo "const unsigned int ROBOTO_REGULAR_FONT_SIZE = $(shell stat -f%z font/Roboto-Regular.ttf);" >> $(BUILD_DIR)/embedded_fonts.cpp
 
 # Update object dependencies
 $(BUILD_DIR)/%.o: $(BUILD_DIR)/%.cpp
@@ -137,27 +133,5 @@ clean:
 	rm -rf $(BIN_DIR)/*
 
 # ...existing code...
-
-# Generate embedded fonts
-embedded_fonts.cpp embedded_fonts.h: font/Play-Chickens.otf font/Roboto-Regular.ttf
-	@echo "Generating embedded fonts..."
-	@echo "#pragma once" > embedded_fonts.h
-	@echo "extern const unsigned char PLAY_CHICKENS_FONT[];" >> embedded_fonts.h
-	@echo "extern const unsigned int PLAY_CHICKENS_FONT_SIZE;" >> embedded_fonts.h
-	@echo "extern const unsigned char ROBOTO_REGULAR_FONT[];" >> embedded_fonts.h 
-	@echo "extern const unsigned int ROBOTO_REGULAR_FONT_SIZE;" >> embedded_fonts.h
-	@echo "#include \"embedded_fonts.h\"" > embedded_fonts.cpp
-	@echo "const unsigned char PLAY_CHICKENS_FONT[] = {" >> embedded_fonts.cpp
-	@hexdump -v -e '16/1 "0x%02x," "\n"' font/Play-Chickens.otf >> embedded_fonts.cpp
-	@echo "};" >> embedded_fonts.cpp
-	@echo -n "const unsigned int PLAY_CHICKENS_FONT_SIZE = " >> embedded_fonts.cpp
-	@stat -f%z font/Play-Chickens.otf >> embedded_fonts.cpp
-	@echo ";" >> embedded_fonts.cpp
-	@echo "const unsigned char ROBOTO_REGULAR_FONT[] = {" >> embedded_fonts.cpp
-	@hexdump -v -e '16/1 "0x%02x," "\n"' font/Roboto-Regular.ttf >> embedded_fonts.cpp 
-	@echo "};" >> embedded_fonts.cpp
-	@echo -n "const unsigned int ROBOTO_REGULAR_FONT_SIZE = " >> embedded_fonts.cpp
-	@stat -f%z font/Roboto-Regular.ttf >> embedded_fonts.cpp
-	@echo ";" >> embedded_fonts.cpp
 
 # ...existing code...
