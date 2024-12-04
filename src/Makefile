@@ -108,12 +108,12 @@ $(BUILD_DIR)/embedded_fonts.h $(BUILD_DIR)/embedded_fonts.cpp:
 	@echo "const unsigned char PLAY_CHICKENS_FONT[] = {" >> $(BUILD_DIR)/embedded_fonts.cpp
 	@hexdump -v -e '16/1 "0x%02x," "\n"' font/Play-Chickens.otf >> $(BUILD_DIR)/embedded_fonts.cpp
 	@echo "};" >> $(BUILD_DIR)/embedded_fonts.cpp
-	@echo "const unsigned int PLAY_CHICKENS_FONT_SIZE = $(shell stat -f%z font/Play-Chickens.otf);" >> $(BUILD_DIR)/embedded_fonts.cpp
+	@echo "const unsigned int PLAY_CHICKENS_FONT_SIZE = $(shell stat -c%s font/Play-Chickens.otf);" >> $(BUILD_DIR)/embedded_fonts.cpp
 	
 	@echo "const unsigned char ROBOTO_REGULAR_FONT[] = {" >> $(BUILD_DIR)/embedded_fonts.cpp
 	@hexdump -v -e '16/1 "0x%02x," "\n"' font/Roboto-Regular.ttf >> $(BUILD_DIR)/embedded_fonts.cpp 
 	@echo "};" >> $(BUILD_DIR)/embedded_fonts.cpp
-	@echo "const unsigned int ROBOTO_REGULAR_FONT_SIZE = $(shell stat -f%z font/Roboto-Regular.ttf);" >> $(BUILD_DIR)/embedded_fonts.cpp
+	@echo "const unsigned int ROBOTO_REGULAR_FONT_SIZE = $(shell stat -c%s font/Roboto-Regular.ttf);" >> $(BUILD_DIR)/embedded_fonts.cpp
 
 # Update object dependencies
 $(BUILD_DIR)/%.o: $(BUILD_DIR)/%.cpp

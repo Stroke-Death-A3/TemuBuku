@@ -35,10 +35,10 @@ function(embed_font OUTPUT_H OUTPUT_CPP FONT_PATH FONT_NAME)
     # Generate cpp content
     file(WRITE "${ABS_OUTPUT_CPP}" "#include \"embedded_fonts.h\"\n\n")
     file(APPEND "${ABS_OUTPUT_CPP}" "const unsigned char ${FONT_NAME}[] = {\n") 
-    file(APPEND("${ABS_OUTPUT_CPP}" "    ${FONT_BYTES}\n")
-    file(APPEND("${ABS_OUTPUT_CPP}" "};\n\n")
+    file(APPEND "${ABS_OUTPUT_CPP}" "    ${FONT_BYTES}\n")
+    file(APPEND "${ABS_OUTPUT_CPP}" "};\n\n")
     # Fix font size output to prevent -n prefix
-    file(APPEND("${ABS_OUTPUT_CPP}" "const unsigned int ${FONT_NAME}_SIZE = ${FONT_SIZE};\n")
+    file(APPEND "${ABS_OUTPUT_CPP}" "const unsigned int ${FONT_NAME}_SIZE = ${FONT_SIZE};\n")
 
 endfunction()
 
