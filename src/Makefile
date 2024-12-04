@@ -26,6 +26,7 @@ UNAME_S := $(shell uname -s)
 LINUX_GL_LIBS = -lGL
 CXXFLAGS = -std=c++17 -I$(IMGUI_DIR)/imgui -I$(IMGUI_DIR)/backends  -I$(IMGUI_DIR)/lib
 CXXFLAGS += -g -Wall -Wformat
+CXXFLAGS += -I$(BUILD_DIR)
 LIBS =
 
 ##---------------------------------------------------------------------
@@ -82,6 +83,7 @@ all: dirs $(BIN_DIR)/$(EXE)
 dirs:
 	@mkdir -p $(BUILD_DIR)
 	@mkdir -p $(BIN_DIR)
+	@mkdir -p $(BUILD_DIR)/font
 
 $(BUILD_DIR)/%.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
@@ -91,6 +93,15 @@ $(BUILD_DIR)/%.o: $(IMGUI_DIR)/imgui/%.cpp
 
 $(BUILD_DIR)/%.o: $(IMGUI_DIR)/backends/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD_DIR)/embedded_fonts.h: $(IMGUI_DIR)/src/font/Play-Chickens.otf $(IMGUI_DIR)/src/font/Roboto-Regular.ttf
+	@echo "Generating embedded fonts header..."
+	@xxd -i $(IMGUI_DIR)/src/font/Play-Chickens.otf > $@.tmp
+	@xxd -i $(IMGUI_DIR)/src/font/Roboto-Regular.ttf >> $@.tmp
+	@sed 's/unsigned char/static const unsigned char/g' $@.tmp > $@
+	@rm $@.tmp
+
+$(OBJS): $(BUILD_DIR)/embedded_fonts.h
 
 $(BIN_DIR)/$(EXE): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
