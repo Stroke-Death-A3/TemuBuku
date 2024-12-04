@@ -64,6 +64,20 @@ TextureID LoadTextureFromURL(const char *url)
     return textureID;
 }
 
+// Font loading code
+void LoadFonts(ImGuiIO& io) {
+    auto playChickensFont = getEmbeddedFont("Play-Chickens.otf");
+    auto robotoRegularFont = getEmbeddedFont("Roboto-Regular.ttf");
+    
+    if (playChickensFont.data) {
+        io.Fonts->AddFontFromMemoryTTF((void*)playChickensFont.data, playChickensFont.size, 16.0f);
+    }
+    
+    if (robotoRegularFont.data) {
+        io.Fonts->AddFontFromMemoryTTF((void*)robotoRegularFont.data, robotoRegularFont.size, 16.0f);
+    }
+}
+
 int main(int, char **)
 
 {
@@ -100,21 +114,10 @@ int main(int, char **)
     ImGuiIO &io = ImGui::GetIO();
 
     // Load custom font
-    std::string playChickensPath = getFontPath("Play-Chickens.otf");
-    std::string robotoPath = getFontPath("Roboto-Regular.ttf");
-    
-    ImFont *customFont = io.Fonts->AddFontFromFileTTF(playChickensPath.c_str(), 24.0f);
-    ImFont *titleFont = io.Fonts->AddFontFromFileTTF(robotoPath.c_str(), 24.0f);
-
-    if (!customFont || !titleFont) {
-        fprintf(stderr, "Failed to load fonts!\n");
-        // Fall back to default font
-        customFont = io.Fonts->AddFontDefault();
-        titleFont = io.Fonts->AddFontDefault();
-    }
+    LoadFonts(io);
 
     // Set default font
-    io.FontDefault = titleFont;
+    io.FontDefault = io.Fonts->Fonts[1]; // Assuming the second font is the title font
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -202,7 +205,7 @@ int main(int, char **)
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));     // White text
 
         // Use title font for header
-        ImGui::PushFont(titleFont);
+        ImGui::PushFont(io.Fonts->Fonts[1]);
         ImGui::Text("Search Book : ");
         ImGui::PopFont();
 
@@ -257,7 +260,7 @@ int main(int, char **)
             // Only show regular search UI if not a special feature
             if (!isSpecialFeature)
             {
-                ImGui::PushFont(titleFont);
+                ImGui::PushFont(io.Fonts->Fonts[1]);
                 ImGui::Text("Found %d matches:", searchResults.size());
                 ImGui::PopFont();
 
@@ -423,7 +426,7 @@ int main(int, char **)
         if (ImGui::BeginPopupModal("Book Details", nullptr,
                                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove))
         {
-            ImGui::PushFont(customFont);
+            ImGui::PushFont(io.Fonts->Fonts[0]);
             ImGui::Text("Book Information");
             ImGui::PopFont();
             ImGui::Separator();

@@ -49,7 +49,8 @@ jobs:
           pkg-config \
           clang \
           libglu1-mesa-dev \
-          mesa-common-dev
+          mesa-common-dev \
+          xxd  # Add xxd for font embedding
     - name: Install Dependencies (macOS)
       if: matrix.os == 'macos-latest'
       run: |
@@ -83,6 +84,10 @@ jobs:
                 -DVCPKG_ROOT="${VCPKG_ROOT}"
           cmake --build build --config Release
         else
+          # Ensure font directory exists
+          mkdir -p src/font
+          # Copy fonts if they exist in different location
+          [ -d "font" ] && cp font/* src/font/
           cd src
           mkdir -p build bin
           make clean
