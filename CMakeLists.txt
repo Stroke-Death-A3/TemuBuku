@@ -13,12 +13,25 @@ endif()
 find_package(OpenGL REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 
-# Create font directory in build
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/font)
+# Define font directory paths
+set(FONT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/font")
+set(FONT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/font")
 
-# Copy font files to build directory
-configure_file(${CMAKE_SOURCE_DIR}/font/Play-Chickens.otf ${CMAKE_BINARY_DIR}/font/Play-Chickens.otf COPYONLY)
-configure_file(${CMAKE_SOURCE_DIR}/font/Roboto-Regular.ttf ${CMAKE_BINARY_DIR}/font/Roboto-Regular.ttf COPYONLY)
+# Create font directory in build
+file(MAKE_DIRECTORY ${FONT_BUILD_DIR})
+
+# Copy font files if they exist
+if(EXISTS "${FONT_DIR}/Play-Chickens.otf")
+    configure_file("${FONT_DIR}/Play-Chickens.otf" "${FONT_BUILD_DIR}/Play-Chickens.otf" COPYONLY)
+else()
+    message(FATAL_ERROR "Font file Play-Chickens.otf not found in ${FONT_DIR}")
+endif()
+
+if(EXISTS "${FONT_DIR}/Roboto-Regular.ttf")
+    configure_file("${FONT_DIR}/Roboto-Regular.ttf" "${FONT_BUILD_DIR}/Roboto-Regular.ttf" COPYONLY)
+else()
+    message(FATAL_ERROR "Font file Roboto-Regular.ttf not found in ${FONT_DIR}")
+endif()
 
 if(WIN32)
     add_executable(TemuBuku
