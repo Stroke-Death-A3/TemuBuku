@@ -22,7 +22,7 @@ function(embed_font OUTPUT_H OUTPUT_CPP FONT_PATH FONT_NAME)
     # Generate header file
     file(WRITE "${OUTPUT_H}" "#pragma once\n\n")
     file(APPEND "${OUTPUT_H}" "extern const unsigned char ${FONT_NAME}[];\n")
-    file(APPEND "${OUTPUT_H}" "extern const unsigned int ${FONT_NAME}_SIZE;\n")
+    file(APPEND("${OUTPUT_H}" "extern const unsigned int ${FONT_NAME}_SIZE;\n")
     
     # Generate cpp file 
     file(WRITE "${OUTPUT_CPP}" "#include \"embedded_fonts.h\"\n\n")
@@ -35,9 +35,13 @@ endfunction()
 # Ensure build directory exists
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}")
 
-# Define font paths
-set(FONTS_H "${CMAKE_BINARY_DIR}/embedded_fonts.h")
-set(FONTS_CPP "${CMAKE_BINARY_DIR}/embedded_fonts.cpp") 
+# Update build directory paths
+set(FONTS_OUTPUT_DIR "${CMAKE_BINARY_DIR}/src")
+file(MAKE_DIRECTORY "${FONTS_OUTPUT_DIR}")
+
+# Define font paths with updated output directory
+set(FONTS_H "${FONTS_OUTPUT_DIR}/embedded_fonts.h")
+set(FONTS_CPP "${FONTS_OUTPUT_DIR}/embedded_fonts.cpp") 
 set(PLAY_CHICKENS_FONT "${CMAKE_SOURCE_DIR}/src/font/Play-Chickens.otf")
 set(ROBOTO_FONT "${CMAKE_SOURCE_DIR}/src/font/Roboto-Regular.ttf")
 
@@ -45,8 +49,8 @@ set(ROBOTO_FONT "${CMAKE_SOURCE_DIR}/src/font/Roboto-Regular.ttf")
 embed_font("${FONTS_H}" "${FONTS_CPP}" "${PLAY_CHICKENS_FONT}" "PLAY_CHICKENS_FONT")
 
 # Generate Roboto font (append to existing files)
-set(TMP_H "${CMAKE_BINARY_DIR}/tmp.h")
-set(TMP_CPP "${CMAKE_BINARY_DIR}/tmp.cpp")
+set(TMP_H "${FONTS_OUTPUT_DIR}/tmp.h")
+set(TMP_CPP "${FONTS_OUTPUT_DIR}/tmp.cpp")
 embed_font("${TMP_H}" "${TMP_CPP}" "${ROBOTO_FONT}" "ROBOTO_REGULAR_FONT")
 
 # Append Roboto font definitions
