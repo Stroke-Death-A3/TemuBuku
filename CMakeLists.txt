@@ -13,10 +13,23 @@ endif()
 find_package(OpenGL REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 
+# Add commands to generate font resources
+configure_file(
+    "${CMAKE_SOURCE_DIR}/font/Play-Chickens.otf"
+    "${CMAKE_BINARY_DIR}/font/Play-Chickens.otf"
+    COPYONLY
+)
+configure_file(
+    "${CMAKE_SOURCE_DIR}/font/Roboto-Regular.ttf"
+    "${CMAKE_BINARY_DIR}/font/Roboto-Regular.ttf"
+    COPYONLY
+)
+
 if(WIN32)
     add_executable(TemuBuku
         src/main.cpp
         src/windows_main.cpp  # Add Windows-specific entry point
+        src/font_resources.h  # Add this new header
         imgui/imgui.cpp
         imgui/imgui_demo.cpp
         imgui/imgui_draw.cpp
@@ -28,6 +41,7 @@ if(WIN32)
 else()
     add_executable(TemuBuku
         src/main.cpp
+        src/font_resources.h  # Add this new header
         imgui/imgui.cpp
         imgui/imgui_demo.cpp
         imgui/imgui_draw.cpp

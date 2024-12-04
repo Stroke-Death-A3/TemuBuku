@@ -23,6 +23,7 @@
 #include "stb_image.h"
 #include "./Process/Gimik.cpp"
 #include <filesystem>
+#include "font_resources.h"
 
 using TextureID = GLuint;
 
@@ -99,8 +100,18 @@ int main(int, char **)
     ImGuiIO &io = ImGui::GetIO();
 
     // Load custom font
-    ImFont *customFont = io.Fonts->AddFontFromFileTTF("../font/Play-Chickens.otf", 24.0f); // Regular size
-    ImFont *titleFont = io.Fonts->AddFontFromFileTTF("../font/Roboto-Regular.ttf", 24.0f); // Larger for titles
+    std::string playChickensPath = getFontPath("Play-Chickens.otf");
+    std::string robotoPath = getFontPath("Roboto-Regular.ttf");
+    
+    ImFont *customFont = io.Fonts->AddFontFromFileTTF(playChickensPath.c_str(), 24.0f);
+    ImFont *titleFont = io.Fonts->AddFontFromFileTTF(robotoPath.c_str(), 24.0f);
+
+    if (!customFont || !titleFont) {
+        fprintf(stderr, "Failed to load fonts!\n");
+        // Fall back to default font
+        customFont = io.Fonts->AddFontDefault();
+        titleFont = io.Fonts->AddFontDefault();
+    }
 
     // Set default font
     io.FontDefault = titleFont;
