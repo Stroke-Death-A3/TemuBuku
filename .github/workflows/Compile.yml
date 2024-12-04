@@ -77,13 +77,11 @@ jobs:
       run: |
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
           export VCPKG_ROOT="${GITHUB_WORKSPACE}/vcpkg"
-          # Copy glfw3.h to a location Visual Studio can find
-          mkdir -p include/GLFW
-          cp "${VCPKG_ROOT}/installed/x64-windows/include/GLFW/glfw3.h" include/GLFW/
           cmake -B build \
                 -DCMAKE_TOOLCHAIN_FILE="${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" \
                 -DCMAKE_BUILD_TYPE=Release \
-                -DVCPKG_TARGET_TRIPLET=x64-windows
+                -DVCPKG_TARGET_TRIPLET=x64-windows \
+                -DVCPKG_ROOT="${VCPKG_ROOT}"
           cmake --build build --config Release
         else
           cd src

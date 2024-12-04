@@ -29,10 +29,8 @@ target_include_directories(TemuBuku PRIVATE
     ${CMAKE_SOURCE_DIR}/backends
     ${CMAKE_SOURCE_DIR}/include
     ${GLFW_INCLUDE_DIRS}
-)
-
-target_link_directories(TemuBuku PRIVATE
-    $ENV{VCPKG_ROOT}/installed/x64-windows/lib
+    # Add vcpkg include path for Windows
+    $<$<PLATFORM_ID:Windows>:${VCPKG_ROOT}/installed/x64-windows/include>
 )
 
 target_link_libraries(TemuBuku PRIVATE
