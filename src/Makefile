@@ -95,7 +95,16 @@ $(BUILD_DIR)/%.o: $(IMGUI_DIR)/imgui/%.cpp
 $(BUILD_DIR)/%.o: $(IMGUI_DIR)/backends/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-# Add rule to generate embedded fonts
+# Add variables for OS-specific commands
+ifeq ($(UNAME_S), Darwin) # Mac OS X
+    HEXDUMP_CMD = hexdump -v -e '16/1 "0x%02x," "\n"' | sed 's/0x  ,//g'
+    FILE_SIZE_CMD = stat -f%z
+else # Linux and others
+    HEXDUMP_CMD = hexdump -v -e '16/1 "0x%02x," "\n"' | sed 's/0x  ,//g'
+    FILE_SIZE_CMD = stat -c%s
+endif
+
+# Update font generation rule to use OS-specific commands
 $(BUILD_DIR)/embedded_fonts.h $(BUILD_DIR)/embedded_fonts.cpp:
 	@echo "Generating embedded fonts files..."
 	@echo "#pragma once" > $(BUILD_DIR)/embedded_fonts.h
@@ -106,14 +115,14 @@ $(BUILD_DIR)/embedded_fonts.h $(BUILD_DIR)/embedded_fonts.cpp:
 	
 	@echo "#include \"embedded_fonts.h\"" > $(BUILD_DIR)/embedded_fonts.cpp
 	@echo "const unsigned char PLAY_CHICKENS_FONT[] = {" >> $(BUILD_DIR)/embedded_fonts.cpp
-	@hexdump -v -e '16/1 "0x%02x," "\n"' font/Play-Chickens.otf | sed 's/0x  ,//g' >> $(BUILD_DIR)/embedded_fonts.cpp
+	@cat font/Play-Chickens.otf | $(HEXDUMP_CMD) >> $(BUILD_DIR)/embedded_fonts.cpp
 	@echo "};" >> $(BUILD_DIR)/embedded_fonts.cpp
-	@echo "const unsigned int PLAY_CHICKENS_FONT_SIZE = $(shell stat -c%s font/Play-Chickens.otf);" >> $(BUILD_DIR)/embedded_fonts.cpp
+	@echo "const unsigned int PLAY_CHICKENS_FONT_SIZE = $$($(FILE_SIZE_CMD) font/Play-Chickens.otf);" >> $(BUILD_DIR)/embedded_fonts.cpp
 	
 	@echo "const unsigned char ROBOTO_REGULAR_FONT[] = {" >> $(BUILD_DIR)/embedded_fonts.cpp
-	@hexdump -v -e '16/1 "0x%02x," "\n"' font/Roboto-Regular.ttf | sed 's/0x  ,//g' >> $(BUILD_DIR)/embedded_fonts.cpp 
+	@cat font/Roboto-Regular.ttf | $(HEXDUMP_CMD) >> $(BUILD_DIR)/embedded_fonts.cpp
 	@echo "};" >> $(BUILD_DIR)/embedded_fonts.cpp
-	@echo "const unsigned int ROBOTO_REGULAR_FONT_SIZE = $(shell stat -c%s font/Roboto-Regular.ttf);" >> $(BUILD_DIR)/embedded_fonts.cpp
+	@echo "const unsigned int ROBOTO_REGULAR_FONT_SIZE = $$($(FILE_SIZE_CMD) font/Roboto-Regular.ttf);" >> $(BUILD_DIR)/embedded_fonts.cpp
 
 # Update object dependencies
 $(BUILD_DIR)/%.o: $(BUILD_DIR)/%.cpp
