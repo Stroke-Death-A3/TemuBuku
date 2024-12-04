@@ -64,8 +64,8 @@ jobs:
       run: |
         git clone https://github.com/microsoft/vcpkg
         .\vcpkg\bootstrap-vcpkg.bat
-        .\vcpkg\vcpkg install glfw3:x64-windows
-        .\vcpkg\vcpkg install opengl:x64-windows
+        .\vcpkg\vcpkg install glfw3:x64-windows-static
+        .\vcpkg\vcpkg install opengl:x64-windows-static
         .\vcpkg\vcpkg integrate install
 
     - name: Setup MSBuild
@@ -80,7 +80,7 @@ jobs:
           cmake -B build \
                 -DCMAKE_TOOLCHAIN_FILE="${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" \
                 -DCMAKE_BUILD_TYPE=Release \
-                -DVCPKG_TARGET_TRIPLET=x64-windows \
+                -DVCPKG_TARGET_TRIPLET=x64-windows-static \
                 -DVCPKG_ROOT="${VCPKG_ROOT}"
           cmake --build build --config Release
         else
