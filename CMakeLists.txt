@@ -33,18 +33,24 @@ else()
     message(FATAL_ERROR "Font file Roboto-Regular.ttf not found in ${FONT_DIR}")
 endif()
 
-# Update custom command to generate both files
+# Define build directories
+set(SRC_BUILD_DIR "${CMAKE_SOURCE_DIR}/src/build")
+file(MAKE_DIRECTORY ${SRC_BUILD_DIR})
+
+# Update custom command to generate both files in src/build
 add_custom_command(
     OUTPUT 
-        "${CMAKE_BINARY_DIR}/embedded_fonts.h"
-        "${CMAKE_BINARY_DIR}/embedded_fonts.cpp"
+        "${SRC_BUILD_DIR}/embedded_fonts.h"
+        "${SRC_BUILD_DIR}/embedded_fonts.cpp"
     COMMAND ${CMAKE_COMMAND} -P "${CMAKE_SOURCE_DIR}/cmake/GenerateEmbeddedFonts.cmake"
     DEPENDS "${FONT_DIR}/Play-Chickens.otf" "${FONT_DIR}/Roboto-Regular.ttf"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
-# Create the custom target for font generation
-add_custom_target(generate_embedded_fonts DEPENDS "${CMAKE_BINARY_DIR}/embedded_fonts.h" "${CMAKE_BINARY_DIR}/embedded_fonts.cpp")
+# Update custom target with new paths
+add_custom_target(generate_embedded_fonts 
+    DEPENDS "${SRC_BUILD_DIR}/embedded_fonts.h" "${SRC_BUILD_DIR}/embedded_fonts.cpp"
+)
 
 # Create the main executable target
 if(WIN32)
@@ -59,8 +65,8 @@ if(WIN32)
         imgui/imgui_widgets.cpp
         backends/imgui_impl_glfw.cpp
         backends/imgui_impl_opengl3.cpp
-        "${CMAKE_BINARY_DIR}/embedded_fonts.h"  # Add the generated header
-        "${CMAKE_BINARY_DIR}/embedded_fonts.cpp"  # Add the generated source
+        "${SRC_BUILD_DIR}/embedded_fonts.h"  # Add the generated header
+        "${SRC_BUILD_DIR}/embedded_fonts.cpp"  # Add the generated source
     )
 else()
     add_executable(TemuBuku
@@ -73,8 +79,8 @@ else()
         imgui/imgui_widgets.cpp
         backends/imgui_impl_glfw.cpp
         backends/imgui_impl_opengl3.cpp
-        "${CMAKE_BINARY_DIR}/embedded_fonts.h"  # Add the generated header
-        "${CMAKE_BINARY_DIR}/embedded_fonts.cpp"  # Add the generated source
+        "${SRC_BUILD_DIR}/embedded_fonts.h"  # Add the generated header
+        "${SRC_BUILD_DIR}/embedded_fonts.cpp"  # Add the generated source
     )
 endif()
 

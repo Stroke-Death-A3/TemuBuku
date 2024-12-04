@@ -36,7 +36,7 @@ endfunction()
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 # Update build directory paths
-set(FONTS_OUTPUT_DIR "${CMAKE_BINARY_DIR}/src")
+set(FONTS_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/src/build")
 file(MAKE_DIRECTORY "${FONTS_OUTPUT_DIR}")
 
 # Define font paths with updated output directory
