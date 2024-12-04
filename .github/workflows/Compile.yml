@@ -73,32 +73,28 @@ jobs:
       uses: microsoft/setup-msbuild@v1.3.1
 
     - name: Build
-      working-directory: ./src
       shell: bash
       run: |
-        mkdir -p build bin
-        make clean
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
-          export VCPKG_ROOT="${GITHUB_WORKSPACE}/vcpkg"
-          CXX="cl.exe" \
-          CXXFLAGS="/nologo /std:c++17" \
-          LDFLAGS="/LIBPATH:\"${VCPKG_ROOT}/installed/x64-windows/lib\"" \
-          make
-        elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-          CXX=${{ matrix.compiler }} \
-          CXXFLAGS="-I/usr/local/include -I/opt/homebrew/include" \
-          make
+          cmake -B build -DCMAKE_TOOLCHAIN_FILE="${GITHUB_WORKSPACE}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          cmake --build build --config Release
         else
-          CXX=${{ matrix.compiler }} \
-          CXXFLAGS="-I/usr/include/GLFW" \
-          make
+          cd src
+          mkdir -p build bin
+          make clean
+          if [ "${{ matrix.os }}" == "macos-latest" ]; then
+            CXX=${{ matrix.compiler }} CXXFLAGS="-I/usr/local/include -I/opt/homebrew/include" make
+          else
+            CXX=${{ matrix.compiler }} CXXFLAGS="-I/usr/include/GLFW" make
+          fi
         fi
+
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: TemuBuku-${{ matrix.os }}-${{ github.ref_name }}
         path: |
-          src/bin/TemuBuku*
+          ${{ matrix.os == 'windows-latest' && 'build/Release/TemuBuku.exe' || 'src/bin/TemuBuku*' }}
         if-no-files-found: error
     - name: Test Run
       working-directory: ./src/bin
