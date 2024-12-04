@@ -22,7 +22,7 @@ function(embed_font OUTPUT_H OUTPUT_CPP FONT_PATH FONT_NAME)
     # Generate header file
     file(WRITE "${OUTPUT_H}" "#pragma once\n\n")
     file(APPEND "${OUTPUT_H}" "extern const unsigned char ${FONT_NAME}[];\n")
-    file(APPEND("${OUTPUT_H}" "extern const unsigned int ${FONT_NAME}_SIZE;\n")
+    file(APPEND "${OUTPUT_H}" "extern const unsigned int ${FONT_NAME}_SIZE;\n")
     
     # Generate cpp file 
     file(WRITE "${OUTPUT_CPP}" "#include \"embedded_fonts.h\"\n\n")
