@@ -1,7 +1,13 @@
 # TemuBuku
 [![Cross-Platform Build](https://github.com/Stroke-Death-A3/TemuBuku/actions/workflows/Compile.yml/badge.svg)](https://github.com/Stroke-Death-A3/TemuBuku/actions/workflows/Compile.yml) 
 
+
 TemuBuku is a book search application implemented using Red-Black Tree data structure in C++. The application provides efficient book searching capabilities through a balanced tree implementation. 
+
+
+## Screenshots
+[![screenshot-05122024-083547.png](https://i.postimg.cc/J0b1YbgW/screenshot-05122024-083547.png)](https://postimg.cc/8fzQjrNy)[![screenshot-05122024-084153.png](https://i.postimg.cc/KzTF4Pmg/screenshot-05122024-084153.png)](https://postimg.cc/BLJRV1Lq)
+
 ## Features
 
 - Book search functionality using Red-Black Tree algorithm
